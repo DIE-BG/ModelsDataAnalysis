@@ -25,7 +25,7 @@ if CI
         # the auto-generated documentation will be hosted at:
         # https://PutYourGitHubNameHere.github.io/ModelsDataAnalysis/dev/
         # (assuming you have enabled `gh-pages` deployment)
-        repo = "github.com/PutYourGitHubNameHere/ModelsDataAnalysis.git",
+        repo = "github.com/DIE-BG/ModelsDataAnalysis.git",
         target = "build",
         push_preview = true,
         devbranch = "main",
