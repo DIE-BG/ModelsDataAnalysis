@@ -87,7 +87,7 @@ periodogram_area(pg)    # 0.4945
 
 # Plot the example periodogram
 example_fig = plot_periodogram(y, L"Cosine function $y = \cos\left(\frac{2\pi t}{8} \right)$", d4l_data.Date)
-save(plotsdir(PLOTSDIR, "example_periodogram.png"), fig, px_per_unit=2.0)
+save(plotsdir(PLOTSDIR, "example_periodogram.png"), example_fig, px_per_unit=2.0)
 
 
 ## Compute the periodogram for all variables in dl4_data
