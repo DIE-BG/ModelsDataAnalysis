@@ -3,11 +3,13 @@ name = "ModelsDataAnalysis"
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 DependentBootstrap = "191d1da1-0f37-5779-b8ea-a655caa0c150"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TimeSeriesEcon = "8b6756d2-c55c-11ea-2998-5f67ea17da60"
 
 [compat]
