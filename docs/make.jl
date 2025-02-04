@@ -18,6 +18,8 @@ makedocs(;
     pages = [
         "index.md",
         "periodogram.md",
+        "mean.md",
+        "std.md"
     ],
     # Don't worry about what `CI` does in this line.
     format = Documenter.HTML(prettyurls = CI),
