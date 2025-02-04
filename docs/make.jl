@@ -4,7 +4,11 @@ using DrWatson
 using Documenter
 
 # Here you may include files from the source directory
-include(srcdir("dummy_src_file.jl"))
+# include(srcdir("dummy_src_file.jl"))
+
+# Copy plots folder 
+# SRC_PLOTS_PATH = mkpath(projectdir("docs", "src", "images", "periodograms"))
+# cp(plotsdir("periodograms"), SRC_PLOTS_PATH; force=true)
 
 @info "Building Documentation"
 makedocs(;
@@ -13,6 +17,7 @@ makedocs(;
     # By default all markdown files in `docs/src` are expanded and included.
     pages = [
         "index.md",
+        "periodogram.md",
     ],
     # Don't worry about what `CI` does in this line.
     format = Documenter.HTML(prettyurls = CI),
