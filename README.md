@@ -35,4 +35,4 @@ running the file `docs/make.jl`, and then launching the generated file
 Alternatively, the documentation may be already hosted online.
 If this is the case it should be at:
 
-https://PutYourGitHubNameHere.github.io/ModelsDataAnalysis/dev/
+https://DIE-BG.github.io/ModelsDataAnalysis/dev/
