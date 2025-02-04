@@ -52,22 +52,6 @@ l2means_stationary = mapreduce(hcat, 1:L) do l
     mean(sample_mean, dims=1) |> vec
 end 
 
-# Mean of nonoverlapping block bootstrap
-L_n = 45
-l2means_nooverlap = mapreduce(hcat, 1:L_n) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:nooverlap, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
-    end
-
-    # Compute summary statistic 
-    mean(sample_mean, dims=1) |> vec
-end 
-
 # standar deviation for MBB
 l2std_moving = mapreduce(hcat, 1:L) do l
 
@@ -97,22 +81,6 @@ l2std_stationary = mapreduce(hcat, 1:L) do l
     # Compute summary statistic 
     std(sample_mean, dims=1) |> vec
 end 
-
-# standar deviation for NBB
-l2std_nooverlap = mapreduce(hcat, 1:L_n) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:nooverlap, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
-    end
-
-    # Compute summary statistic 
-    std(sample_mean, dims=1) |> vec
-end
-
 
 # MSE for MBB
 actual_means = mean(mat_d4l_data, dims=1)
@@ -144,21 +112,6 @@ l2mse_stationary = mapreduce(vcat, 1:L) do l
     # Compute summary statistic 
     mean((sample_mean .- actual_means).^2, dims=1)
 end 
-
-# MSE for NBB
-l2mse_nooverlap = mapreduce(vcat, 1:L_n) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:nooverlap, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
-    end
-
-    # Compute summary statistic 
-    mean((sample_mean .- actual_means).^2, dims=1)
-end
 
 ## Bias and variance for MBB and SBB
 # Bias MBB
@@ -216,37 +169,33 @@ ax = Axis(fig[2,1], title = "Promedio (L2) del estimador de la media histórica"
 
 lines!(ax, 1:L, l2means_moving[nvar, :], linewidth=2, label = "Moving")
 lines!(ax, 1:L, l2means_stationary[nvar, :], linewidth=2, label = "Stationary")
-lines!(ax, 1:L_n, l2means_nooverlap[nvar, :], linewidth=2, label = "Non overlapping")
 hlines!(ax, actual_means[nvar], color=:red, linewidth=2, linestyle=:dash, label = "Media historica")
 
 axislegend(position = :rb, framevisible = false)
 
 # Standar deviation
-ax = Axis(fig[2,2], title = "Desviación estándar (L2) \nde la medía histórica")
+ax = Axis(fig[2,2], title = "Desviación estándar (L2) \ndel estimador de la media histórica")
 
 lines!(ax, 1:L, l2std_moving[nvar, :], label="Moving")
 lines!(ax, 1:L, l2std_stationary[nvar, :], label="Stationary")
-lines!(ax, 1:L_n, l2std_nooverlap[nvar, :], label="Non overlapping")
-
 
 axislegend(position = :rt, framevisible = false)
 
 # MSE
-ax = Axis(fig[2,3], title = "Error Cuadrático Medio \nde la media histórica")
+ax = Axis(fig[2,3], title = "Error Cuadrático Medio \ndel estimador de la media histórica")
 
 lines!(ax, 1:L, l2mse_moving[:, nvar], label="Moving")
 lines!(ax, 1:L, l2mse_stationary[:, nvar], label="Stationary")
-lines!(ax, 1:L_n, l2mse_nooverlap[:, nvar], label="Non overlapping")
 band!(1:L, repeat([0], L), bias_stationary[:,nvar], color = RGBf(0.008, 0.467, 0.878), alpha = 0.35, label = "sesgo")
 band!(1:L, bias_stationary[:,nvar], variance_stationary[:,nvar].+ bias_stationary[:,nvar], color = :red, alpha = 0.35, label = "varianza")
 
 axislegend(position = :rt, framevisible = false)
 
-save(plotsdir(string(nvar)*"_"*string(var_cod[nvar])*".png"), fig, px_per_unit=2.0)
+save(plotsdir("mean//"*string(nvar)*"_"*string(var_cod[nvar])*".png"), fig, px_per_unit=2.0)
 
 end
 
-# bias and variance
+## Plots bias and variance
 map(1:nvar) do nvar
 
    fig = Figure(size = (950, 600))
