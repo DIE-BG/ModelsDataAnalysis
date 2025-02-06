@@ -1,7 +1,7 @@
-# Standar deviation analysis
+# standard deviation analysis
 
-## Standar deviation of Moving and Stationary Block Bootstrap
-The first graph shows the estimator of the standar deviation at each possible block size, the second the standard deviation of 10000 simulations and the last the MSE of the standar deviation estimator.
+## standard deviation of Moving and Stationary Block Bootstrap
+The first graph shows the estimator of the standard deviation at each possible block size, the second the standardd deviation of 10000 simulations and the last the MSE of the standard deviation estimator.
 
 ![](images/variance/1_D4L_CPI.png)
 ![](images/variance/2_D4L_CPIXFE.png)
@@ -14,9 +14,9 @@ The first graph shows the estimator of the standar deviation at each possible bl
 ![](images/variance/9_D4L_GDP.png)
 ![](images/variance/10_D4L_GDP_RW.png)
 
-## Bias and variance of MSE of the standar deviation estimator
+## Bias and variance of MSE of the standard deviation estimator
 
-Bias and variance decomposition for MSE of standar deviation estimator.
+Bias and variance decomposition for MSE of standard deviation estimator.
 
 ![](images/bias_variance_variance/1_D4L_CPI_bias_variance.png)
 ![](images/bias_variance_variance/2_D4L_CPIXFE_bias_variance.png)
