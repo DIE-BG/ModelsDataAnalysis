@@ -5,6 +5,7 @@ using Statistics
 using DependentBootstrap
 using CairoMakie
 using DataFramesMeta
+using CSV, Tables
 
 #include(srcdir("mean_helpers.jl"))
 
@@ -84,6 +85,23 @@ end
 
 # MSE for MBB
 actual_means = mean(mat_d4l_data, dims=1)
+l2mse_moving = Matrix{Float64}(undef, 91, 10)
+
+for l in 1:L
+    inds = dbootinds(mat_d4l_data, bootmethod=:moving, blocklength=l, numresample=B)
+    for b in 1:B
+        sample_mean[b,:] = mean(mat_d4l_data[inds[b], :], dims = 1)
+    end
+    sample_std = std(sample_mean, dims = 1)
+
+    z = (sample_mean .- actual_means)./sample_std
+    z_2 = z.^2
+    
+    l2mse_moving[l,:] = mean(z_2, dims = 1)
+
+end
+
+
 l2mse_moving = mapreduce(vcat, 1:L) do l
 
     # Compute indices
@@ -93,10 +111,17 @@ l2mse_moving = mapreduce(vcat, 1:L) do l
     for b in 1:B 
         sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
     end
+    
+    sample_std = std(sample_mean, dims=1)
 
     # Compute summary statistic 
-    mean((sample_mean .- actual_means).^2, dims=1)
-end 
+    mean(((sample_mean .- actual_means)./sample_std).^2, dims=1)
+end
+
+fig = Figure(size = (950, 600))
+ax = Axis(fig[1,1], title = "MSE", subtitle = "Variable 3")
+lines!(ax, 1:L, l2mse_stationary[:,3])
+fig
 
 # MSE for SBB
 l2mse_stationary = mapreduce(vcat, 1:L) do l
@@ -109,50 +134,21 @@ l2mse_stationary = mapreduce(vcat, 1:L) do l
         sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
     end
 
-    # Compute summary statistic 
-    mean((sample_mean .- actual_means).^2, dims=1)
-end 
-
-## Bias and variance for MBB and SBB
-# Bias MBB
-bias_moving = mapreduce(vcat, 1:L) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:moving, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
-    end
+    sample_std = std(sample_mean, dims=1)
 
     # Compute summary statistic 
-    (mean(sample_mean, dims = 1) .- actual_means).^2
+    mean(((sample_mean .- actual_means)./sample_std).^2, dims=1)
 end 
 
-variance_moving = l2mse_moving .- bias_moving
+# Average MSE of al macroeconomic series
+l2mse_moving_all = mean(l2mse_moving, dims = 2)
+l2mse_stationary_all = mean(l2mse_stationary, dims = 2)
 
-# Bias SBB
-bias_stationary = mapreduce(vcat, 1:L) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:stationary, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_mean[b, :] = mean(mat_d4l_data[inds[b], :], dims=1)
-    end
-
-    # Compute summary statistic 
-    (mean(sample_mean, dims = 1) .- actual_means).^2
-end 
-
-# Variance MBB
-variance_stationary = l2mse_stationary .- bias_stationary
 
 ## Plots
-varnames = ["Inflación total", "Inflación subyacente", "Precios de Importados", "Tipo de Cambio",
-            "Base Monetaria", "Inflación externa", "Tasa líder", "Tasa externa", "Producto doméstico",
-            "Producto Externo"]
+varnames = ["total inflation", "core inflation", "import prices", "exchange rate",
+            "Monetary base", "external inflation", "policy rate", "external policy rate", "Domestic product",
+            "external product"]
 
 var_cod = propertynames(d4l_data)[2:end]
 
@@ -163,12 +159,12 @@ mkdir(plotsdir()*"\\mean")
 
 map(1:nvar) do nvar
 
-            fig = Figure(size = (2750,1000), fontsize = 25)
+            fig = Figure(size = (2750,1500), fontsize = 25)
 
-Label(fig[1, 2],  string(varnames[nvar]), fontsize = 60, tellwidth = false, halign = :center)
+Label(fig[1,1:2],  string(varnames[nvar]), fontsize = 60, tellwidth = false, halign = :center)
 
 # Mean
-ax = Axis(fig[2,1], title = "Promedio (L2) del estimador de la media histórica")
+ax = Axis(fig[2,1], title = "Average (L2) of the historical mean estimator")
 
 lines!(ax, 1:L, l2means_moving[nvar, :], linewidth=2, label = "Moving")
 lines!(ax, 1:L, l2means_stationary[nvar, :], linewidth=2, label = "Stationary")
@@ -177,26 +173,42 @@ hlines!(ax, actual_means[nvar], color=:red, linewidth=2, linestyle=:dash, label 
 axislegend(position = :rb, framevisible = false)
 
 # Standard deviation
-ax = Axis(fig[2,2], title = "Desviación estándar (L2) \nde la medía histórica")
+ax = Axis(fig[2,2], title = "Average (L2) \nof the historical mean estimator")
 
 lines!(ax, 1:L, l2std_moving[nvar, :], label="Moving")
 lines!(ax, 1:L, l2std_stationary[nvar, :], label="Stationary")
 
 axislegend(position = :rt, framevisible = false)
 
-# MSE
-ax = Axis(fig[2,3], title = "Error Cuadrático Medio \nde la media histórica")
+# MSE moving
+ax = Axis(fig[3,1], title = "Mean square error \nof the historial mean estimator",
+            subtitle = "Moving")
 
-lines!(ax, 1:L, l2mse_moving[:, nvar], label="Moving")
-lines!(ax, 1:L, l2mse_stationary[:, nvar], label="Stationary")
-band!(1:L, repeat([0], L), bias_stationary[:,nvar], color = RGBf(0.008, 0.467, 0.878), alpha = 0.35, label = "sesgo")
-band!(1:L, bias_stationary[:,nvar], variance_stationary[:,nvar].+ bias_stationary[:,nvar], color = :red, alpha = 0.35, label = "varianza")
+lines!(ax, 1:L, l2mse_moving[:, nvar])
 
-axislegend(position = :rt, framevisible = false)
+# MSE stationary
+ax = Axis(fig[3,2], title = "Mean square error \nof the historical mean estimator",
+            subtitle = "Stationary")
+
+lines!(ax, 1:L, l2mse_stationary[:,nvar])
 
 save(plotsdir()*"\\mean\\"*string(nvar)*"_"*string(var_cod[nvar])*".png", fig, px_per_unit=2.0)
 
 end
+
+# Average MSE of all variables
+
+fig = Figure(size = (950, 600))
+ax = Axis(fig[1,1], title = "Average MSE of the historial mean estimator", subtitle = "Moving")
+lines!(ax, 1:L, l2mse_moving_all[:,1])
+save(plotsdir()*"\\mean\\"*"MSE_moving.png", fig, px_per_unit=2.0)
+
+fig = Figure(size = (950, 600))
+ax = Axis(fig[1,1], title = "Average MSE of the historial mean estimator", subtitle = "Moving")
+lines!(ax, 1:L, l2mse_stationary_all[:,1])
+save(plotsdir()*"\\mean\\"*"MSE_stationary.png", fig, px_per_unit=2.0)
+
+
 
 mkdir(plotsdir()*"\\mean"*"\\bias\\")
 
