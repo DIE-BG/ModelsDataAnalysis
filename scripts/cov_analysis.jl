@@ -45,7 +45,7 @@ function resample_stats!(bootstrap_samples_cor, method=:stationary, l=10)
     end
 end
 
-# Array of (lags of ACF, variable, block length, bootstrap realization)
+# Array of (variable, variable, block length, bootstrap realization)
 sbb_bootstrap_samples_cor = Array{eltype(mat_d4l_data)}(undef, K, K, L_block, B)
 mbb_bootstrap_samples_cor = Array{eltype(mat_d4l_data)}(undef, K, K, L_block, B)
 
