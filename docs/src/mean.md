@@ -2,7 +2,7 @@
 
 ## Means of Moving and Stationary Block Bootstrap
 
-The first graph shows the estimator of the mean at each possible block size, the second the standard deviation of 10000 simulations and the last the MSE of the mean estimator.
+The first graph shows the estimator of the mean at each possible block size, the second the standardd deviation of 10000 simulations and the last the MSE of the mean estimator.
 
 ![](images/means/1_D4L_CPI.png)
 ![](images/means/2_D4L_CPIXFE.png)
