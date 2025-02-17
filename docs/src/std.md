@@ -1,4 +1,4 @@
-# standard deviation analysis
+# Standard Deviation Analysis
 
 ## standard deviation of Moving and Stationary Block Bootstrap
 The first graph shows the estimator of the standard deviation at each possible block size, the second the standardd deviation of 10000 simulations and the last the MSE of the standard deviation estimator.

@@ -1,4 +1,4 @@
-# Mean analysis
+# Mean Analysis
 
 ## Means of Moving and Stationary Block Bootstrap
 
