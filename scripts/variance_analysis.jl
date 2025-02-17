@@ -126,46 +126,6 @@ end
 l2mse_moving_all = mean(l2mse_moving, dims = 2)
 l2mse_stationary_all = mean(l2mse_stationary, dims = 2)
 
-## Bias and variance for MBB and SBB
-# Bias MBB
-bias_moving = mapreduce(vcat, 1:L) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:moving, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_variance[b, :] = var(mat_d4l_data[inds[b], :], dims=1)
-    end
-
-    # Compute summary statistic 
-    (mean(sample_variance, dims = 1) .- actual_variance).^2
-end 
-
-variance_moving = l2mse_moving .- bias_moving
-
-# Bias SBB
-bias_stationary = mapreduce(vcat, 1:L) do l
-
-    # Compute indices
-    inds = dbootinds(mat_d4l_data, bootmethod=:stationary, blocklength=l, numresample=B)
-    
-    # Perform the block bootstrap with length l
-    for b in 1:B 
-        sample_variance[b, :] = var(mat_d4l_data[inds[b], :], dims=1)
-    end
-
-    # Compute summary statistic 
-    (mean(sample_variance, dims = 1) .- actual_variance).^2
-end 
-
-# Variance MBB
-variance_stationary = l2mse_stationary .- bias_stationary
-
-# Average MSE of al macroeconomic series
-l2mse_moving_all = mean(l2mse_moving, dims = 2)
-l2mse_stationary_all = mean(l2mse_stationary, dims = 2)
-
 ## Plots
 varnames = ["total inflation", "core inflation", "import prices", "exchange rate",
             "Monetary base", "external inflation", "policy rate", "external policy rate", "Domestic product",

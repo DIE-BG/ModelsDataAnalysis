@@ -5,7 +5,6 @@ using Statistics
 using DependentBootstrap
 using CairoMakie
 using DataFramesMeta
-using CSV, Tables
 
 #include(srcdir("mean_helpers.jl"))
 
@@ -87,21 +86,6 @@ end
 actual_means = mean(mat_d4l_data, dims=1)
 l2mse_moving = Matrix{Float64}(undef, 91, 10)
 
-for l in 1:L
-    inds = dbootinds(mat_d4l_data, bootmethod=:moving, blocklength=l, numresample=B)
-    for b in 1:B
-        sample_mean[b,:] = mean(mat_d4l_data[inds[b], :], dims = 1)
-    end
-    sample_std = std(sample_mean, dims = 1)
-
-    z = (sample_mean .- actual_means)./sample_std
-    z_2 = z.^2
-    
-    l2mse_moving[l,:] = mean(z_2, dims = 1)
-
-end
-
-
 l2mse_moving = mapreduce(vcat, 1:L) do l
 
     # Compute indices
@@ -118,11 +102,6 @@ l2mse_moving = mapreduce(vcat, 1:L) do l
     mean(((sample_mean .- actual_means)./sample_std).^2, dims=1)
 end
 
-fig = Figure(size = (950, 600))
-ax = Axis(fig[1,1], title = "MSE", subtitle = "Variable 3")
-lines!(ax, 1:L, l2mse_stationary[:,3])
-fig
-
 # MSE for SBB
 l2mse_stationary = mapreduce(vcat, 1:L) do l
 
@@ -138,12 +117,11 @@ l2mse_stationary = mapreduce(vcat, 1:L) do l
 
     # Compute summary statistic 
     mean(((sample_mean .- actual_means)./sample_std).^2, dims=1)
-end 
+end
 
 # Average MSE of al macroeconomic series
 l2mse_moving_all = mean(l2mse_moving, dims = 2)
 l2mse_stationary_all = mean(l2mse_stationary, dims = 2)
-
 
 ## Plots
 varnames = ["total inflation", "core inflation", "import prices", "exchange rate",
@@ -201,14 +179,13 @@ end
 fig = Figure(size = (950, 600))
 ax = Axis(fig[1,1], title = "Average MSE of the historial mean estimator", subtitle = "Moving")
 lines!(ax, 1:L, l2mse_moving_all[:,1])
+axislegend(position = :rt, framevisible = false)
 save(plotsdir()*"\\mean\\"*"MSE_moving.png", fig, px_per_unit=2.0)
 
 fig = Figure(size = (950, 600))
 ax = Axis(fig[1,1], title = "Average MSE of the historial mean estimator", subtitle = "Moving")
 lines!(ax, 1:L, l2mse_stationary_all[:,1])
 save(plotsdir()*"\\mean\\"*"MSE_stationary.png", fig, px_per_unit=2.0)
-
-
 
 mkdir(plotsdir()*"\\mean"*"\\bias\\")
 
