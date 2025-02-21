@@ -53,14 +53,14 @@ $\text{MSE}\left(\hat{\theta}_{i}^{m}\right) =\frac{1}{B}\sum_{b=1}^{B}\left( \h
 
 As we want to generate a measure that combines an overall error in all statistics, we implemented a normalized MSE, which transforms the MSE by the standard deviation of the estimator in all replications. 
 This modification allows us aggregating the error for statistics of different scales. 
-So, we calculate a normalized mean square error to measure the error between the sample statistic and the original sample statistic, in relation to the variance of the sample statistic under a given bootsrap method. The normalized MSE is definen as follows:
+So, we calculate a normalized mean square error to measure the error between the sample statistic and the original sample statistic, in relation to the variance of the sample statistic under a given bootsrap method. The normalized MSE is defined as follows:
 
-$\text{nMSE}\left(\hat{\theta}_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\text{sd}\left(\hat{\theta}_{i}^{m}\right)}$
+$\text{nMSE}\left(\hat{\theta}_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left[\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\text{sd}\left(\hat{\theta}_{i}^{m}\right)}\right]^{2}$
 
 where:
 - $i$ is the number of bootstrap replication. 
 - $B$ is the total number of replications, i.e., 10,000.
-- $\hat{\theta}_{i}^{m,(b)}$ is the $b$-th resampled statistic for covariate $i$ under block bootstrap method $m$ with length $l$
+- $\hat{\theta}_{i}^{m}$ is the statistic for covariate $i$ under block bootstrap method $m$ with length $l$. Superindex $(b)$ denotes the $b$-th bootstrap replication.
 - $\theta_{i}$ is the statistic for covariate $i$ observed in the full sample.
 - $\hat\sigma_{i}^{m}$ is the standard deviation of the distribution of resampled statistics for covariate $i$ under block bootstrap method $m$. 
 
@@ -104,11 +104,11 @@ As we have four different main statistics that we are concerned the bootstrap sa
 
 Hereafter, let $i$ index a variable and $m$ a block bootstrap method. Let $\hat\mu_{i}^{m}$ the sample mean estimator. We form the mean component of the unified metric by averaging over covariates:
 
-$\text{MSE}\left(\hat{\mu}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{MSE}\left(\hat{\mu}_{k}^{m}\right)$
+$\text{nMSE}\left(\hat{\mu}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\mu}_{k}^{m}\right)$
 
 Similarly, for the sample variance estimator, $\hat{\sigma^2}_{i}^{m}$, we form the variance component of the unified metric by averaging over covariates: 
 
-$\text{MSE}\left(\hat{\sigma^{2}}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{MSE}\left(\hat{\sigma^{2}}_{k}^{m}\right)$
+$\text{nMSE}\left(\hat{\sigma^{2}}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\sigma^{2}}_{k}^{m}\right)$
 
 Now, for the autocorrelation function we are evaluating its closeness to the one computed on the whole sample using up to 12 lags. 
 Let $\hat\gamma_{i,l}^{m}$ the $l$-th entry of the sample autocorrelation function, where $l=1,\ldots,12$. (Note $\hat\gamma_{i,0}^{m}=1$ always.)  
@@ -127,3 +127,23 @@ Let $\hat\rho_{i,j}^{m}$ be the samle correlation between covariates $i$ and $j$
 
 $\text{nMSE}\left(\hat{\rho}^{m}\right)=\frac{2}{K\left(K-1\right)}\sum_{i=1}^{K}\sum_{j<i}\text{nMSE}\left(\hat{\rho}_{i,j}^{m}\right)$
 
+In sum, the unified metric for bootstrap method $m$, $\text{unMSE}\left(m\right)$, is defined as the sum of four components: 
+
+$\text{unMSE}\left(m\right)=\text{nMSE}\left(\hat{\mu}^{m}\right)+\text{nMSE}\left(\hat{\sigma^{2}}^{m}\right)+\text{nMSE}\left(\hat{\gamma}^{m}\right)+\text{nMSE}\left(\hat{\rho}^{m}\right)$ 
+
+In the following figure, we plot the four components of the unified metric as a function of the block length: 
+
+![center](images/simulation_study/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+
+We can see that the autocorrelation dominates the normalized error decomposition because the bias is too high for small block lengths. 
+In the following figure, we show the behavior of the other three components: 
+
+![center](images/simulation_study/unified/unified_metrics_components_nacf_B=10000_L_autocor=12_L_block=90_method=stationary_moving.png)
+
+Then, we compute the sum of the four components to get the unified metric. This is shown in the figure below. 
+As we can see, the total error decays quickly with the block length for both block methods.
+This rapid decrease suggests that the block length for resampling the whole dataset (with 91 observations) is not necessarily too big to approximate well the four components we care about with the unified metric.  
+The MBB exhibits a minimum at $l=19$. 
+Althought the SBB does not exhibit a minimum value, we find that 95% of the total decrease in the error occurs at a block length $l=10$. This result is, of course, contingent on the maximum block length explored for the resampling, which is $40$ for the figure below. However, we re-run the experiment with a maximum block length of $90$ (almost the number of observations in the dataset) and find that the 95% decrease in the total error occurs at the block length $l=11$. 
+
+![center](images/simulation_study/unified/unified_metrics_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
