@@ -147,3 +147,25 @@ The MBB exhibits a minimum at $l=19$.
 Althought the SBB does not exhibit a minimum value, we find that 95% of the total decrease in the error occurs at a block length $l=10$. This result is, of course, contingent on the maximum block length explored for the resampling, which is $40$ for the figure below. However, we re-run the experiment with a maximum block length of $90$ (almost the number of observations in the dataset) and find that the 95% decrease in the total error occurs at the block length $l=11$. 
 
 ![center](images/simulation_study/unified/unified_metrics_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+
+
+## Optimal block size from the literature
+
+We compare our insights about the block length with the methodology of  Patton, Politis y White (2009) (hereafter, PPW).
+They derive a procedure for obtaining the optimal block length for a time series using spectral methods. 
+This procedure is available in the Julia library `DependentBootstrap.jl`. 
+We apply this procedure to the same individual time series from our dataset. 
+
+The optimal block size estimator in the paper uses a criterion based on minimizing the asymptotic mean squared error of the stationary bootstrap estimator. 
+It relies on estimating the autocovariance structure of the data and selecting a block length that balances capturing dependence and maintaining bootstrap efficiency.
+
+The following figure shows the results of applying PPW to each of the time series in our dataset. We can see that most series require a block length of less than 10. However, time series like core inflation (D4L\_CPIXFE) and the year-on-year change of the exchange rate (D4L\_S) require a higher block length, as they are more persistent, and thus, their correlogram functions decay slower.
+The figure also shows the average and the median block length. 
+The Julia library computes the median by default to combine the different block lengths for a dataset. Unfortunately, we could not found any formal criteria to choose the block length for a multivariate dataset.  
+
+![center](images/simulation_study/optblock/ppw2009_optimal_block_length_data=d4l.png)
+
+
+## Concluding remarks
+
+<!-- to-do -->
