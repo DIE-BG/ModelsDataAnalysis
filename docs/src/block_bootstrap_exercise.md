@@ -93,7 +93,7 @@ Let us note how the MSE behavior of the sample variance estimator in the MMB met
 
 ## Results of the sample autocorrelation function
 For the autocorrelation fuction analysis we have an additional dimention, the lags of the variable itsel, to determinate the error with respect to the sample autocorrelation fuction. In our excercise we consider 12 lags to generate the sample autocorrelation function estimator. In particular we have an arrage of dimension $13\tex{x}10\tex{x}40\tex{x}10000$:
-}
+
 - 12 lags plus lag 0
 - 10 variables
 - 40 possible block lengths
@@ -104,3 +104,14 @@ We mesure the MSE for all possible block lengths in the same way that mean an va
 ![](images/simulation_study/autocorr/agg_acf_mse_method=stationary_moving.png)
 ![](images/simulation_study/autocorr/agg_acf_norm_mse_method=stationary_moving.png)
 
+For both MBB and SBB and also for its normalized version of MSE, the error decays significantly in the first 10 possible block lengths. This property is very important because it tells us about a continuously decaying error for the SBB and a minimum error in the MBB method as we can see in the graphs. To complete the analysis, we will show the results of the last statistic of interest, namely the covariance matrix.
+
+## Results of the sample covariance matrix
+In the same way as the autocorrelation function, the covariance matrix adds an additional dimension to the analysis to determine the error with respect to the sample covariance matrix. For de covariance matrix we measured the MSE with the lower triangular elements.
+
+The normalized MSE shows the same behavior for the MBB and SBB methods, with slightly more volatility for the SBB method. Like in others statistics the SBB method exhibits the best results with consistently smaller MSE than the MBB method.
+
+![](images/simulation_study/cov/cor_mse_method=stationary_moving.png)
+![](images/simulation_study/cov/norm_cor_mse_method=stationary_moving.png)
+
+Consistently with others statistics the SBB method is the best to replicate the sample covariance matrix characteristics.

@@ -7,7 +7,7 @@ using DataFrames
 using DataFramesMeta
 import Printf
 using DependentBootstrap: dbootinds
-using Statistics: mean, cov, cor
+using Statistics
 using LinearAlgebra: tril
 
 # Helper functions
@@ -57,6 +57,7 @@ map(l -> resample_stats!(mbb_bootstrap_samples_cor, :moving, l), 1:L_block)
 
 l = 5
 
+varnames = string.(propertynames(d4l_data))[begin+1:end]
 # Generate a figure for each block length
 map(1:L_block) do l 
 
@@ -108,22 +109,24 @@ eval_mask = tril(repeat([true], 10, 10), -1)
 # Plot the overall MSE of the correlation matrix vs block length
 # MSE
 function mse_cor(bootstrap_samples_cor, l)
+    cor_agg_fn=(m -> 2 * sum(m) / (K * (K-1)))
     # Get bootstrap samples for each block length l
     bootstrap_samples = @view bootstrap_samples_cor[:, :, l, :]
     # Compute MSE
-    mse = sum(mean(sqr, eval_mask .* (bootstrap_samples .- obs_cor), dims=3))::Float64
-    mse
+    mse = mean(sqr, eval_mask .* (bootstrap_samples .- obs_cor), dims=3)
+    mse = cor_agg_fn(mse)
 end
 
 # Normalized MSE
 function norm_mse_cor(bootstrap_samples_cor, l)
+    cor_agg_fn=(m -> 2 * sum(m) / (K * (K-1)))
     # Get bootstrap samples for each block length l
     bootstrap_samples = @view bootstrap_samples_cor[:, :, l, :]
     # STD
-    std_bootstrap = std(bootstrap_samples, dims = 2)
+    std_cor = std(bootstrap_samples, dims = 3)
     # Compute MSE
-    mse = sum(mean(sqr, eval_mask .* ((bootstrap_samples .- obs_cor)./std_bootstrap), dims=3))::Float64
-    mse
+    mse = mean(sqr, eval_mask .* ((bootstrap_samples .- obs_cor) ./ std_cor), dims=3)
+    mse = cor_agg_fn(mse)
 end
 
 # MSE
@@ -142,20 +145,26 @@ ax  = Axis(fig[3,1], xlabel="Block length", ylabel="Mean Squared Error")
 
 lines!(ax, 1:L_block, sbb_mse_cor, linewidth=2, label="Stationary")
 lines!(ax, 1:L_block, mbb_mse_cor, linewidth=2, label="Moving")
-axislegend(framevisible=false)
+axislegend(framevisible=false, position = :rb)
 filename = savename("cor_mse", (method="stationary_moving",), "png", sort=false)
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
 
 # plot Normalized MSE
-fig = Figure(size=(950,550))
-lt  = Label(fig[1,1], "Block Bootstrap Normalized MSE of lower triangular covariance matrix", fontsize=18, font=:bold, tellwidth=false)
-st  = Label(fig[2,1], "", fontsize=18, tellwidth=false)
-ax  = Axis(fig[3,1], xlabel="Block length", ylabel="Mean Squared Error")
+fig = Figure(size=(1200,550))
+# Moving
+ax  = Axis(fig[1,1], xlabel="Block length", ylabel="Mean Squared Error",
+            title = "Average normalized MSE of lower triangular covariance matrix",
+            subtitle = "Moving")
+lines!(ax, 1:L_block, norm_mbb_mse_cor, linewidth=2)
 
-lines!(ax, 1:L_block, norm_sbb_mse_cor, linewidth=2, label="Stationary")
-lines!(ax, 1:L_block, norm_mbb_mse_cor, linewidth=2, label="Moving")
-axislegend(framevisible=false)
-filename = savename("cor_mse", (method="stationary_moving",), "png", sort=false)
+ax  = Axis(fig[1,2], xlabel="Block length", ylabel="Mean Squared Error",
+            title = "Average normalized MSE of lower triangular covariance matrix",
+            subtitle = "Stationary")
+lines!(ax, 1:L_block, norm_sbb_mse_cor, linewidth=2)
+filename = savename("norm_cor_mse", (method="stationary_moving",), "png", sort=false)
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
+
+
+

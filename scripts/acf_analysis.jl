@@ -231,12 +231,12 @@ mbb_norm_mse_per_variable = mapreduce(hcat, 1:K) do k
 end
 
 # Overall MSE is the sum of the per_variable MSEs 
-sbb_agg_mse_acf = sum(sbb_mse_per_variable, dims=2) |> vec
-mbb_agg_mse_acf = sum(mbb_mse_per_variable, dims=2) |> vec
+sbb_agg_mse_acf = mean(sbb_mse_per_variable, dims=2) |> vec
+mbb_agg_mse_acf = mean(mbb_mse_per_variable, dims=2) |> vec
 
 # Overall MSE is the sum of the per_variable MSEs 
-norm_sbb_agg_mse_acf = sum(sbb_norm_mse_per_variable, dims=2) |> vec
-norm_mbb_agg_mse_acf = sum(mbb_norm_mse_per_variable, dims=2) |> vec
+norm_sbb_agg_mse_acf = mean(sbb_norm_mse_per_variable, dims=2) |> vec
+norm_mbb_agg_mse_acf = mean(mbb_norm_mse_per_variable, dims=2) |> vec
 
 
 
@@ -263,3 +263,11 @@ filename = savename("agg_acf_norm_mse", (method="stationary_moving",), "png", so
 axislegend(framevisible=false)
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
+
+
+norm_sbb_agg_mse_acf
+
+1 - norm_sbb_agg_mse_acf[6]/maximum(norm_sbb_agg_mse_acf)
+
+
+

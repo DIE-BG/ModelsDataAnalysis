@@ -252,23 +252,23 @@ map(1:nvar) do nvar
  end
 
  # Average MSE of all variables
-fig = Figure(size = (1200, 600))
+fig = Figure(size = (1500, 600), fontsize = 20)
 ax = Axis(fig[1,1], title = "Average MSE of the historial variance estimator", 
          subtitle = "Moving",
          xlabel = L"\text{Block length } l")
 
 lines!(ax, 1:L, l2mse_moving_all[:,1])
-ylims!(ax, 0, 16)
+ylims!(ax, 0, 16.5)
 
 ax = Axis(fig[1,2], title = "Average MSE of the historial variance estimator",
           subtitle = "Stationary",
           xlabel = L"\text{Block length } l")
 lines!(ax, 1:L, l2mse_stationary_all[:,1])
-ylims!(ax, 0, 16)
+ylims!(ax, 0, 16.5)
 save(plotsdir()*"\\variance\\"*"all_MSE.png", fig, px_per_unit=2.0)
 
 # Average Normalized MSE of all variables
-fig = Figure(size = (1200, 600))
+fig = Figure(size = (1500, 600), fontsize = 20)
 ax = Axis(fig[1,1], title = "Average normalized MSE of the historial mean estimator", 
          subtitle = "Moving",
          xlabel = L"\text{Block length } l")
@@ -279,5 +279,4 @@ ax = Axis(fig[1,2], title = "Average normalized MSE of the historial mean estima
           subtitle = "Stationary",
           xlabel = L"\text{Block length } l")
 lines!(ax, 1:L, l2norm_mse_stationary_all[:,1])
-
 save(plotsdir()*"\\variance\\"*"all_normalized_MSE.png", fig, px_per_unit=2.0)
