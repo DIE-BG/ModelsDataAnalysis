@@ -154,7 +154,7 @@ fig_acf_variable = map(1:K) do k
         # mse = mean(sqr, bootstrap_samples .- obs_autocor_var)
 
         # weights = collect(L_autocor:-1:1) / sum(1:12)
-        weights = ones(12) / sum(1:12)
+        weights = ones(12) / 12
         sum(weights .* mse)
     end
 
@@ -170,7 +170,7 @@ fig_acf_variable = map(1:K) do k
     fig
 end
 
-fig_acf_variable[2]
+fig_acf_variable[1]
 
 
 ## MSE aggregated analysis 
@@ -187,12 +187,32 @@ function mse_acf_variable(bootstrap_samples_autocor, k)
         mse = mean(sqr, bootstrap_samples .- obs_autocor_var, dims=2) |> vec
         # Average the MSE values over the ACF lags
         # weights = collect(L_autocor:-1:1) / sum(1:12)     # More weight to the first lags
-        weights = ones(L_autocor) / sum(1:L_autocor)        # Equal weights
+        weights = ones(L_autocor) / L_autocor        # Equal weights
+        sum(weights .* mse)
+    end
+end
+
+# Normalized MSE aggregated analysis
+function norm_mse_acf_variable(bootstrap_samples_autocor, k) 
+    # Compute the MSE for each block length l
+    mse_acf = map(1:L_block) do l 
+        # Get bootstrap samples for variable k, blocklength l, only lags 1-L_autocor
+        bootstrap_samples = @view bootstrap_samples_autocor[begin+1:end, k, l, :]
+        obs_autocor_var   = obs_autocor[begin+1:end, k]
+
+        # MSE is the mean over the realizations' dimension (dims=2)
+        std_autocor = std(bootstrap_samples, dims=2)
+        mse = mean(sqr, ((bootstrap_samples .- obs_autocor_var)./std_autocor), dims=2) |> vec
+        # Average the MSE values over the ACF lags
+        # weights = collect(L_autocor:-1:1) / sum(1:12)     # More weight to the first lags
+        weights = ones(L_autocor) / L_autocor        # Equal weights
         sum(weights .* mse)
     end
 end
 
 mse_acf_variable(sbb_bootstrap_samples_autocor, 1)
+norm_mse_acf_variable(sbb_bootstrap_samples_autocor, 1)
+
 
 # Plot the overall MSE of the ACF per variable
 sbb_mse_per_variable = mapreduce(hcat, 1:K) do k 
@@ -202,9 +222,23 @@ mbb_mse_per_variable = mapreduce(hcat, 1:K) do k
     mse_acf_variable(mbb_bootstrap_samples_autocor, k)
 end
 
+# Plot the overall normalized MSE of the ACF per variable
+sbb_norm_mse_per_variable = mapreduce(hcat, 1:K) do k 
+    norm_mse_acf_variable(sbb_bootstrap_samples_autocor, k)
+end
+mbb_norm_mse_per_variable = mapreduce(hcat, 1:K) do k 
+    norm_mse_acf_variable(mbb_bootstrap_samples_autocor, k)
+end
+
 # Overall MSE is the sum of the per_variable MSEs 
 sbb_agg_mse_acf = sum(sbb_mse_per_variable, dims=2) |> vec
 mbb_agg_mse_acf = sum(mbb_mse_per_variable, dims=2) |> vec
+
+# Overall MSE is the sum of the per_variable MSEs 
+norm_sbb_agg_mse_acf = sum(sbb_norm_mse_per_variable, dims=2) |> vec
+norm_mbb_agg_mse_acf = sum(mbb_norm_mse_per_variable, dims=2) |> vec
+
+
 
 # Plot aggregated MSE vs block length 
 fig = Figure(size=(950,550))
@@ -218,3 +252,14 @@ axislegend(framevisible=false)
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
 
+# Plot aggregated normalized MSE vs block length 
+fig = Figure(size=(950,550))
+lt  = Label(fig[1,1], "Stationary & Moving Block Bootstrap aggregated normalized MSE of autocorrelation functions", fontsize=18, font=:bold, tellwidth=false)
+st  = Label(fig[2,1], "(ACF lags 1 - $L_autocor)", fontsize=18, tellwidth=false)
+ax  = Axis(fig[3,1], xlabel="Block length", ylabel="Mean Squared Error")
+lines!(ax, 1:L_block, norm_sbb_agg_mse_acf, linewidth=2, label="Stationary")
+lines!(ax, 1:L_block, norm_mbb_agg_mse_acf, linewidth=2, label="Moving")
+filename = savename("agg_acf_norm_mse", (method="stationary_moving",), "png", sort=false)
+axislegend(framevisible=false)
+save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
+fig

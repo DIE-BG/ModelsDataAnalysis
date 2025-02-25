@@ -25,17 +25,15 @@ In our exercise, the objetive is to sample pseudo datasets using bootstrapping m
 
 The time series considered are year-on-year rates of change, in quarterly frequency, of the following variables:
 
-(Agregar en esta lista los D4L_<> correspondientes)
-
-1. Real GDP of the US
-2. PCE core inflation
-3. Effective Federal Funds Rate
-4. Domestic real GDP
-5. Total domestic inflation
-6. Domestic core inflation
-7. Exchange rate (GTQ/USD)
-8. Monetary base
-9. Monetary policy rate
+1. Real GDP of the US (D4L_GDP_RW)
+2. PCE core inflation (D4L_CPI_RW)
+3. Effective Federal Funds Rate (RS_RW)
+4. Domestic real GDP (D4L_GDP)
+5. Total domestic inflation (D4L_CPI)
+6. Domestic core inflation (D4L_CPIXFE)
+7. Exchange rate (GTQ/USD) (D4L_S)
+8. Monetary base (D4L_MB)
+9. Monetary policy rate (RS)
 
 In order to generate robust results in this exercise, we generated 10,000 pseudo time series across a window of possible block lengths. To check the correct replication of the statistical properties, we computed important statistics for our purposes. These are:
 
@@ -44,20 +42,19 @@ In order to generate robust results in this exercise, we generated 10,000 pseudo
 3. The autocorrelation fuction up to 12 lags (or 3 years in quarterly frequency).
 4. The correlation matrix between covariates.
 
-For each bootstrap replication (pseudo time series for a given block length), we compute the above statistics and compare them to the statistics obtained from the actual sample. 
-The idea is to compare the error that a given boostrap method (and its corresponding parametrization) gives in replicating the statistical properties of each time series. 
+For each bootstrap replication (pseudo time series for a given block length), we compute the above statistics and compare them to the statistics obtained from the actual sample. The idea is to compare the error that a given boostrap method (and its corresponding parametrization) gives in replicating the statistical properties of each time series. 
 
-The (unnormalized) MSE measures the error for one series and probably the error in all series if we decide to average all series. However, we consider it is not the best way to measure the error if we have statistics with different scales. 
+The (unnormalized) MSE measures the error for one series and probably the error in all series if we decide to average all series. However, we consider it is not the best way to measure the error if we have statistics with different scales.
 
 (Modificar para que se parezca a la segunda pero sin normalizar)
 
-$MSE=\frac{1}{B}\sum_{i=1}^{B}\hat{\theta}_i-\theta$
+$\text{MSE}\left(\hat\theta_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left(\hat{\theta}_{i}^{m,(b)}-\theta_{i}\right)^{2}$
 
 As we want to generate a measure that combines an overall error in all statistics, we implemented a normalized MSE, which transforms the MSE by the standard deviation of the estimator in all replications. 
 This modification allows us aggregating the error for statistics of different scales. 
 So, we calculate a normalized mean square error to measure the error between the sample statistic and the original sample statistic, in relation to the variance of the sample statistic under a given bootsrap method. The normalized MSE is definen as follows:
 
-$\text{MSE}\left(\hat\theta_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\hat\sigma_{i}^{m}}$
+$\text{MSE}\left(\hat\theta_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left(\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\hat\sigma_{i}^{m}}\right)^{2}$
 
 where:
 - $i$ is the number of bootstrap replication. 
@@ -80,21 +77,30 @@ The first plot shows the average of the original MSE of all series and the secon
 However, for the normalized MSE and for all possible block lengths, the mean estimator obtained by SBB is consistently close to one, which means that the estimator has low bias for every block length $l$ considered. 
 Note the mean estimator of the MBB starts close to one for small block lengths, it consistently deviates from one as the block length gets larger.
 
-(En las gráficas, llamar solo "MSE" al que no normaliza (quitar "Original"). Sincronizar los ejes de la primera gráfica (hay un comando en Makie para eso). Quitar título central superior. Agregar etiqueta eje X: Block length $l$)
-
-![](images/simulation_study/mean/Original_MSE.png)
-![](images/simulation_study/mean/Modified_MSE.png)
+![](images/simulation_study/mean/all_MSE.png)
+![](images/simulation_study/mean/all_normalized_MSE.png)
 
 As we said before, we prefer the normalized MSE metric since it allows us to average the error among covariates and aggregate across various statistics of interest.
 
-## Results for the sample standard deviation
+## Results for the sample variance
 
 For the sample variance of the covariates, we follow a similar procedure for comparing between block bootstrap methods as the one used for the sample mean. 
 
-(Gráficas MSE)
-(Gráficas MSE normalizado)
+![](images/simulation_study/variance/all_MSE.png)
+![](images/simulation_study/variance/all_normalized_MSE.png)
 
-(Descripción de las gráficas)
-(Conclusión)
+Let us note how the MSE behavior of the sample variance estimator in the MMB method is more volatile than the SBB method. This is true for the unnormalized MSE as well as for the normalized MSE. In both cases we prefer the SBB method as the most apropiate method to replicate the sample variance. But the analysis is incomplete, we need the results of norrmalized MSE of mean, autocorrelation fuction and covariance matrix to determinate the best method to replicate the estistics of interest.
 
-<!-- Use the folder images/simulation_study for the images of the presentation -->
+## Results of the sample autocorrelation function
+For the autocorrelation fuction analysis we have an additional dimention, the lags of the variable itsel, to determinate the error with respect to the sample autocorrelation fuction. In our excercise we consider 12 lags to generate the sample autocorrelation function estimator. In particular we have an arrage of dimension $13\tex{x}10\tex{x}40\tex{x}10000$:
+}
+- 12 lags plus lag 0
+- 10 variables
+- 40 possible block lengths
+- 10,000 pseudo time series (block bootstrap series)
+
+We mesure the MSE for all possible block lengths in the same way that mean an variance analysis, but the difference is we have an additional dimention. To measure the MSE we calculate a weighted average over the lags. All weights decay exponentially.
+
+![](images/simulation_study/autocorr/agg_acf_mse_method=stationary_moving.png)
+![](images/simulation_study/autocorr/agg_acf_norm_mse_method=stationary_moving.png)
+
