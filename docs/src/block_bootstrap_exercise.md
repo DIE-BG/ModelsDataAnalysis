@@ -46,27 +46,25 @@ For each bootstrap replication (pseudo time series for a given block length), we
 
 The (unnormalized) MSE measures the error for one series and probably the error in all series if we decide to average all series. However, we consider it is not the best way to measure the error if we have statistics with different scales.
 
-(Modificar para que se parezca a la segunda pero sin normalizar)
-
-$\text{MSE}\left(\hat\theta_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left(\hat{\theta}_{i}^{m,(b)}-\theta_{i}\right)^{2}$
+$\text{MSE}\left(\hat{\theta}_{i}^{m}\right) =\frac{1}{B}\sum_{b=1}^{B}\left( \hat{\theta}_{i}^{m,(b)} - \theta_{i} \right)^2$
 
 As we want to generate a measure that combines an overall error in all statistics, we implemented a normalized MSE, which transforms the MSE by the standard deviation of the estimator in all replications. 
 This modification allows us aggregating the error for statistics of different scales. 
-So, we calculate a normalized mean square error to measure the error between the sample statistic and the original sample statistic, in relation to the variance of the sample statistic under a given bootsrap method. The normalized MSE is definen as follows:
+So, we calculate a normalized mean square error to measure the error between the sample statistic and the original sample statistic, in relation to the variance of the sample statistic under a given bootsrap method. The normalized MSE is defined as follows:
 
-$\text{MSE}\left(\hat\theta_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left(\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\hat\sigma_{i}^{m}}\right)^{2}$
+$\text{nMSE}\left(\hat{\theta}_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left[\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\text{sd}\left(\hat{\theta}_{i}^{m}\right)}\right]^{2}$
 
 where:
 - $i$ is the number of bootstrap replication. 
 - $B$ is the total number of replications, i.e., 10,000.
-- $\hat{\theta}_{i}^{m,(b)}$ is the $b$-th resampled statistic for covariate $i$ under block bootstrap method $m$ with length $l$
+- $\hat{\theta}_{i}^{m}$ is the statistic for covariate $i$ under block bootstrap method $m$ with length $l$. Superindex $(b)$ denotes the $b$-th bootstrap replication.
 - $\theta_{i}$ is the statistic for covariate $i$ observed in the full sample.
 - $\hat\sigma_{i}^{m}$ is the standard deviation of the distribution of resampled statistics for covariate $i$ under block bootstrap method $m$. 
 
 The normalized MSE takes values around one for any statistic $\theta_i$, so it is very convenient to combine them to obtain a single metric that captures the error for each of the covariates and desired statistics. 
 Finally, we will compare the overall performance between bootstrap methods by averaging the evaluation metric between covariates, as follows: 
 
-$\text{MSE}\left(\hat\theta^m\right) = \frac{1}{K} \sum_{k=1}^{K} \text{MSE}\left(\hat\theta_{k}^{m}\right)$
+$\text{nMSE}\left(\hat\theta^m\right) = \frac{1}{K} \sum_{k=1}^{K} \text{nMSE}\left(\hat\theta_{k}^{m}\right)$
 
 
 ## Results for the sample mean
@@ -115,3 +113,77 @@ The normalized MSE shows the same behavior for the MBB and SBB methods, with sli
 ![](images/simulation_study/cov/norm_cor_mse_method=stationary_moving.png)
 
 Consistently with others statistics the SBB method is the best to replicate the sample covariance matrix characteristics.
+<!-- Use the folder images/simulation_study for the images of the presentation -->
+
+
+## Unified metric for comparing block bootstrap metrics
+
+As we have four different main statistics that we are concerned the bootstrap samples replicate from the dataset, we propose comparing block bootstrap methods (and possibly other resampling methodologies) by an aggregation of the normalized MSEs for the mean, the variance, and the entries of the autocorrelation function and the correlation matrix between covariates.
+
+Hereafter, let $i$ index a variable and $m$ a block bootstrap method. Let $\hat\mu_{i}^{m}$ the sample mean estimator. We form the mean component of the unified metric by averaging over covariates:
+
+$\text{nMSE}\left(\hat{\mu}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\mu}_{k}^{m}\right)$
+
+Similarly, for the sample variance estimator, $\hat{\sigma^2}_{i}^{m}$, we form the variance component of the unified metric by averaging over covariates: 
+
+$\text{nMSE}\left(\hat{\sigma^{2}}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\sigma^{2}}_{k}^{m}\right)$
+
+Now, for the autocorrelation function we are evaluating its closeness to the one computed on the whole sample using up to 12 lags. 
+Let $\hat\gamma_{i,l}^{m}$ the $l$-th entry of the sample autocorrelation function, where $l=1,\ldots,12$. (Note $\hat\gamma_{i,0}^{m}=1$ always.)  
+We again combine the MSE for each of the entries of the autocorrelation function using a decaying exponential weighted average as follows: 
+
+$\text{nMSE}\left(\hat{\gamma}_{i}^{m}\right)=\frac{1}{\bar{\alpha}}\sum_{l=1}^{12}\alpha^{i-1}\text{nMSE}\left(\hat{\gamma}_{i,l}^{m}\right)$
+
+where, of course, $\bar{\alpha}=\sum_{l=1}^{12}\alpha^{i-1}$. We use $\alpha=0.9$. 
+Then, the autocorrelation component of the unified metric is computed by averaging over covariates: 
+
+$\text{nMSE}\left(\hat{\gamma}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\gamma}_{k}^{m}\right)$
+
+Finally, for the correlation between covariates, we follow a similar approach as for the autocorrelation. We average over the normalized MSEs of the sample correlation statistics below the main diagonal of the correlation matrix. 
+
+Let $\hat\rho_{i,j}^{m}$ be the samle correlation between covariates $i$ and $j$ under block bootstrap method $m$. We compute the correlation component of the unified metric by averaging over entries of the lower triangular part of the correlation matrix: 
+
+$\text{nMSE}\left(\hat{\rho}^{m}\right)=\frac{2}{K\left(K-1\right)}\sum_{i=1}^{K}\sum_{j<i}\text{nMSE}\left(\hat{\rho}_{i,j}^{m}\right)$
+
+In sum, the unified metric for bootstrap method $m$, $\text{unMSE}\left(m\right)$, is defined as the sum of four components: 
+
+$\text{unMSE}\left(m\right)=\text{nMSE}\left(\hat{\mu}^{m}\right)+\text{nMSE}\left(\hat{\sigma^{2}}^{m}\right)+\text{nMSE}\left(\hat{\gamma}^{m}\right)+\text{nMSE}\left(\hat{\rho}^{m}\right)$ 
+
+In the following figure, we plot the four components of the unified metric as a function of the block length: 
+
+![center](images/simulation_study/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+
+We can see that the autocorrelation dominates the normalized error decomposition because the bias is too high for small block lengths. 
+In the following figure, we show the behavior of the other three components: 
+
+![center](images/simulation_study/unified/unified_metrics_components_nacf_B=10000_L_autocor=12_L_block=90_method=stationary_moving.png)
+
+Then, we compute the sum of the four components to get the unified metric. This is shown in the figure below. 
+As we can see, the total error decays quickly with the block length for both block methods.
+This rapid decrease suggests that the block length for resampling the whole dataset (with 91 observations) is not necessarily too big to approximate well the four components we care about with the unified metric.  
+The MBB exhibits a minimum at $l=19$. 
+Althought the SBB does not exhibit a minimum value, we find that 95% of the total decrease in the error occurs at a block length $l=10$. This result is, of course, contingent on the maximum block length explored for the resampling, which is $40$ for the figure below. However, we re-run the experiment with a maximum block length of $90$ (almost the number of observations in the dataset) and find that the 95% decrease in the total error occurs at the block length $l=11$. 
+
+![center](images/simulation_study/unified/unified_metrics_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+
+
+## Optimal block size from the literature
+
+We compare our insights about the block length with the methodology of  Patton, Politis y White (2009) (hereafter, PPW).
+They derive a procedure for obtaining the optimal block length for a time series using spectral methods. 
+This procedure is available in the Julia library `DependentBootstrap.jl`. 
+We apply this procedure to the same individual time series from our dataset. 
+
+The optimal block size estimator in the paper uses a criterion based on minimizing the asymptotic mean squared error of the stationary bootstrap estimator. 
+It relies on estimating the autocovariance structure of the data and selecting a block length that balances capturing dependence and maintaining bootstrap efficiency.
+
+The following figure shows the results of applying PPW to each of the time series in our dataset. We can see that most series require a block length of less than 10. However, time series like core inflation (D4L\_CPIXFE) and the year-on-year change of the exchange rate (D4L\_S) require a higher block length, as they are more persistent, and thus, their correlogram functions decay slower.
+The figure also shows the average and the median block length. 
+The Julia library computes the median by default to combine the different block lengths for a dataset. Unfortunately, we could not found any formal criteria to choose the block length for a multivariate dataset.  
+
+![center](images/simulation_study/optblock/ppw2009_optimal_block_length_data=d4l.png)
+
+
+## Concluding remarks
+
+<!-- to-do -->

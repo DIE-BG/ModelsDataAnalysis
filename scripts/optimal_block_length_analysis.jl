@@ -27,10 +27,13 @@ const varnames = string.(propertynames(d4l_data))[begin+1:end]
 ## Analysis of D4L data
 
 # Median optimal block length
+# Default is bootmethod=:stationary
 optblocklength(mat_d4l_data, blocklengthmethod=:ppw2009)
+# optblocklength(mat_d4l_data, blocklengthmethod=:ppw2009, bootmethod=:stationary)
+# optblocklength(mat_d4l_data, blocklengthmethod=:ppw2009, bootmethod=:moving)
 
 # Optimal block length for each variable
-opt_block_sizes = map(col -> optblocklength(col), eachcol(mat_d4l_data))
+opt_block_sizes = map(col -> optblocklength(col, bootmethod=:stationary), eachcol(mat_d4l_data))
 median(opt_block_sizes)
 
 # Makie figure 
@@ -44,7 +47,7 @@ barplot!(ax, 1:K, opt_block_sizes,
 )
 ax.xticks = (1:K, varnames)
 ax.xticklabelrotation = pi/4
-ylims!(ax, 0, 25)
+ylims!(ax, 0, 30)
 
 mean_block_size = mean(opt_block_sizes)
 median_block_size = median(opt_block_sizes)
@@ -56,7 +59,7 @@ text!(ax, 9.5, mean_block_size, text="Average = $(ft1(mean_block_size))", fontsi
 text!(ax, 9.5, median_block_size, text="Median = $(ft1(median_block_size))", fontsize=13)
 
 filename = savename("ppw2009_optimal_block_length", (;data="d4l"), "png")
-save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
+# save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
 
 ## Analysis of DLA data
