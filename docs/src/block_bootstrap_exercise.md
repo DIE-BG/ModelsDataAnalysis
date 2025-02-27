@@ -169,13 +169,55 @@ Althought the SBB does not exhibit a minimum value, we find that 95% of the tota
 
 ## Optimal block size from the literature
 
-We compare our insights about the block length with the methodology of  Patton, Politis y White (2009) (hereafter, PPW).
+We compare our insights about the block length with the methodology of  Patton, Politis y White (2009)[^PPW2009] (hereafter, PPW).
 They derive a procedure for obtaining the optimal block length for a time series using spectral methods. 
 This procedure is available in the Julia library `DependentBootstrap.jl`. 
 We apply this procedure to the same individual time series from our dataset. 
 
-The optimal block size estimator in the paper uses a criterion based on minimizing the asymptotic mean squared error of the stationary bootstrap estimator. 
-It relies on estimating the autocovariance structure of the data and selecting a block length that balances capturing dependence and maintaining bootstrap efficiency.
+The optimal block size estimator in the paper uses a criterion based on minimizing the asymptotic mean squared error of the stationary bootstrap variance estimator. 
+In the end, their approach relies on estimating the autocovariance structure of the data and selecting a block length that balances capturing dependence and maintaining bootstrap efficiency.
+
+### Politis and White's (2004) Proposal for the Optimal Block Size
+
+We present an introduction of Politis and White's (2004)[^PW2004] methodology for estimating the optimal (expected) block size of the stationary bootstrap. From a theorem in Lahiri (1999),[^Lahiri1999] Politis and White (2004) derive: 
+
+$\text{MSE}\left(\hat{\sigma}_{b,SB}^{2}\right)=\frac{G^{2}}{b^{2}}+D_{SB}\frac{b}{N}+o\left(b^{-2}\right)+o\left(b/N\right),$ 
+
+so, the large-sample $\text{MSE}\left(\hat{\sigma}_{b,SB}^{2}\right)$ is minimized when choosing 
+
+$b_{opt,SB}=\left(\frac{2G^{2}}{D_{SB}}\right)^{1/3}N^{1/3}.$ 
+
+In the above equations, the quantities $D_{SB}$ and $G$ depend on the autocovariance function, $R\left(k\right)$, and the power spectral density function, $g(w)$, of the time series: 
+
+$D_{SB}=2g^{2}\left(0\right)$
+
+and 
+
+$G=\sum_{k=-\infty}^{\infty}|k|R\left(k\right).$ 
+
+Next, Politis and White (2004)[^PW2004] use the "flat-top" lag-window of Politis and Romano (1995) to estimate the infinite sums involved in the calculation of $G$ and $g(w)$. So, they provide a final estimator for the optimal block size: 
+
+$\begin{aligned}
+\hat{g}\left(w\right) & =\sum_{k=-M}^{M}\lambda\left(k/M\right)\hat{R}\left(k\right)\cos\left(wk\right), \\
+\hat{G}	& =\sum_{k=-M}^{M}\lambda\left(k/M\right)|k|\hat{R}\left(k\right), \\
+\hat{D}_{SB} & =2\hat{g}^{2}\left(0\right) \\
+\end{aligned}$
+
+In the above, $\hat{R}$ is the sample autocovariance function, $\lambda\left(\cdot\right)$ is the flat-top trapezoidal window function. The expressions depend also on the parameter $M$, which Politis and White (2004) recommend choosing by inspection of the correlogram.[^M]
+
+The expressions above for $D_{SB}$ were corrected by Patton, Politis and White (2009), since Nordman (2008)[^Nordman2008] discovered an error in Lahiri's (1999) calculation of the variance associated with the stationary bootstrap. The final expression above for $D_{SB}$ is much simpler than the original (erroneous) expression from Politis and White (2004). 
+
+[^PPW2009]: Patton, A., Politis, D. N., & White, H. (2009). Correction to “Automatic block-length selection for the dependent bootstrap” by D. Politis and H. White. Econometric Reviews, 28(4), 372-375.
+
+[^M]: In particular, Politis and Romano (1995) suggest looking for the smallest integer, say $\hat{m}$, after which the correlogram appears negligible, i.e., $\hat{R}(k) \approx 0$ for $k>\hat{m}$. After identifying this value on the correlogram, the recomendation is to take $M=2\hat{m}$. 
+
+[^PW2004]: Politis, D. N., White, H. (2004). Automatic block-length selection for the dependent bootstrap. Econometric Reviews 23(1):53–70
+
+[^Lahiri1999]: Lahiri, S. N. (1999). Theoretical comparisons of block bootstrap methods. Annals of Statistics 27:386–404
+
+[^Nordman2008]: Nordman, D. J. (2008). A note on the stationary bootstrap's variance. Annals of Statistics
+
+### Results
 
 The following figure shows the results of applying PPW to each of the time series in our dataset. We can see that most series require a block length of less than 10. However, time series like core inflation (D4L\_CPIXFE) and the year-on-year change of the exchange rate (D4L\_S) require a higher block length, as they are more persistent, and thus, their correlogram functions decay slower.
 The figure also shows the average and the median block length. 
