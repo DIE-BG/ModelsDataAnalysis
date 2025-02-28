@@ -1,24 +1,37 @@
 # Block Bootstrap Simulation Exercise
 
+## Introduction 
+
+We present an ad-hoc simulation study for the variables used in the macroeconomic models at DIE-BG. 
+In our quest to assess the macroeconomic models in a robust manner, we aim to generate pseudo-test data using block bootstrap methods. This data can then be used to mimic fresh evaluation data to perform pseudo out-of-sample forecasting. 
+The purpose of the simulation study presented here is to find suitable block lengths for the stationary and moving block bootstrap methods. 
+
+The outline of the document is as follows. First, we present a brief introduction to the block bootstrap methods. Then, we describe a basic simulation exercise to perform using the bootstrap methods. Following, we report the results of the basic simulation exercise applied to relevant statistics of the data. We later compile and summarize those results in a unified metric to obtain insights about an ideal block length parameter for the bootstrap methods. Lastly, we compare our results with those from an optimal block length methodology available in the literature.
+
 ## Bootstraping methods for dependent data
-In the literature there are some methods for dependent data. Some of them are named as "first generation methods" and take as a basis a block that is of fixed length or changes at each iteration and then resampling theese bloks until they replicates the length of the original sample.
+In the literature, we can find different methods for dependent data. 
+Some of them are regarded as "first generation methods," and take as basis fixed-length blocks or variable-length blocks. 
+Blocks are resampled in an independent manner until forming a replication of the time series (usually of the same length as the original sample).
 
-## Moving Block Bootstrap (MBB)
-We start from a given sample size $X_n \equiv \{X_1,...,X_n\}$. And then we define a block of length $l$, with $l$ being an even number that satisfies $1\leq l \leq n$. Once we have defined the block length we form different blocks of length $l$ contained in $X_n$ as follows.
+### Moving Block Bootstrap (MBB)
+We start from a given sample $X_n \equiv \{X_1,...,X_n\}$ of size $n$. Then, we define a block of length $l$, with $l$ being a number that satisfies $1\leq l \leq n$. Once we have defined the block length we form different blocks of length $l$ contained in $X_n$ as follows.
 
-$B_1 = (X_1, X_2, ... ,X_l)$
-$B_2 = (X_2, X_3, ... ,X_{l+1})$
-$... ... ...$
-$B_N = (X_{n-l+1}, ... ,X_n)$
+$$\begin{aligned}
+B_{1} & =\left(X_{1},X_{2},...,X_{l}\right)\\
+B_{2} & =\left(X_{2},X_{3},...,X_{l+1}\right)\\
+\vdots & =\vdots\\
+B_{N} & =\left(X_{n-l+1},...,X_{n}\right)
+\end{aligned}$$
 
-$N = n-l+1$ denotes the number of total blocks of length $l$ that will be formed and on which the bootstrap will be applied. Allowing the overlapping of the blocks in each iteration until the original sample length is reached. After the n bootstrap observations are formed, we proceed to estimate the statistic of interest (mean, variance, autocorrelation function or some other).
+where $N = n-l+1$ denotes the number of total blocks of length $l$ that will be formed and on which the bootstrap will be applied. Allowing the overlapping of the blocks in each iteration until the original sample length is reached. After the n bootstrap observations are formed, we proceed to estimate the statistic of interest (mean, variance, autocorrelation function or some other).
 
-## Stationary Block Bootstrap (SBB)
+### Stationary Block Bootstrap (SBB)
 As Moving Block Bootstrap we have a sample of $N$ observations of which we assume that they are stationary and time dependent. This method has the property of producing stationary pseudo time series.
 
 The SBB method shares with the MBB the characteristic of working with blocks of time series that when joined together generate a “single block” of length $N$ as that of the original sample. The difference between SBB and MBB is that the block length in SBB changes at each iteration and in MBB the length is fixed. The algorithm as follows:
 
 Let $X_1^*$ be an observation drawn at random from the original $N$ observations. $X_1^*$ is the first observation of the first block, so $X_1^*$ is defined as $X_1^* = X_{I_1}$. The next one has probability $p$ of being randomly drawn from the original $N$ observations and probability $1-p$ of being $X_2^* = X_{I_1+1}$ which be the next one in the original sample. The process ends when the $X_j^*$ is to be drawn at random from the original $N$ observations, this being the first observation of the next block. The iteration ends when we have a number of blocks that being joined together formed a "single block" of length $N$. So, the average length of the blocks is $\frac{1}{p}$.
+
 
 ## Basic simulation exercise
 In our exercise, the objetive is to sample pseudo datasets using bootstrapping methods on the time series used for building macroeconomic models. The pseudo time series must adequately replicate some statistical properties of the original series. 
@@ -44,7 +57,7 @@ In order to generate robust results in this exercise, we generated 10,000 pseudo
 
 For each bootstrap replication (pseudo time series for a given block length), we compute the above statistics and compare them to the statistics obtained from the actual sample. The idea is to compare the error that a given boostrap method (and its corresponding parametrization) gives in replicating the statistical properties of each time series. 
 
-The (unnormalized) MSE measures the error for one series and probably the error in all series if we decide to average all series. However, we consider it is not the best way to measure the error if we have statistics with different scales.
+The Mean Squared Error (MSE) measures the error for one series and probably the error in all series if we decide to average all series. However, we consider it is not the best way to measure the error if we have statistics with different scales.
 
 $\text{MSE}\left(\hat{\theta}_{i}^{m}\right) =\frac{1}{B}\sum_{b=1}^{B}\left( \hat{\theta}_{i}^{m,(b)} - \theta_{i} \right)^2$
 
@@ -55,7 +68,7 @@ So, we calculate a normalized mean square error to measure the error between the
 $\text{nMSE}\left(\hat{\theta}_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left[\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\text{sd}\left(\hat{\theta}_{i}^{m}\right)}\right]^{2}$
 
 where:
-- $i$ is the number of bootstrap replication. 
+- l $i$ is the number of bootstrap replication. 
 - $B$ is the total number of replications, i.e., 10,000.
 - $\hat{\theta}_{i}^{m}$ is the statistic for covariate $i$ under block bootstrap method $m$ with length $l$. Superindex $(b)$ denotes the $b$-th bootstrap replication.
 - $\theta_{i}$ is the statistic for covariate $i$ observed in the full sample.
@@ -90,7 +103,7 @@ For the sample variance of the covariates, we follow a similar procedure for com
 Let us note how the MSE behavior of the sample variance estimator in the MMB method is more volatile than the SBB method. This is true for the unnormalized MSE as well as for the normalized MSE. In both cases we prefer the SBB method as the most apropiate method to replicate the sample variance. But the analysis is incomplete, we need the results of norrmalized MSE of mean, autocorrelation fuction and covariance matrix to determinate the best method to replicate the estistics of interest.
 
 ## Results of the sample autocorrelation function
-For the autocorrelation fuction analysis we have an additional dimention, the lags of the variable itsel, to determinate the error with respect to the sample autocorrelation fuction. In our excercise we consider 12 lags to generate the sample autocorrelation function estimator. In particular we have an arrage of dimension $13\tex{x}10\tex{x}40\tex{x}10000$:
+For the autocorrelation fuction analysis we have an additional dimention, the lags of the variable itsel, to determinate the error with respect to the sample autocorrelation fuction. In our excercise we consider 12 lags to generate the sample autocorrelation function estimator. In particular we have an arrage of dimension $13 \times 10 \times 40 \times 10000$:
 
 - 12 lags plus lag 0
 - 10 variables
@@ -187,15 +200,14 @@ so, the large-sample $\text{MSE}\left(\hat{\sigma}_{b,SB}^{2}\right)$ is minimiz
 
 $b_{opt,SB}=\left(\frac{2G^{2}}{D_{SB}}\right)^{1/3}N^{1/3}.$ 
 
-In the above equations, the quantities $D_{SB}$ and $G$ depend on the autocovariance function, $R\left(k\right)$, and the power spectral density function, $g(w)$, of the time series: 
+In the above equations, the sample size is $N$, and the quantities $D_{SB}$ and $G$ depend on the autocovariance function, $R\left(k\right)$, and the power spectral density function, $g(w)$, of the time series: 
 
-$D_{SB}=2g^{2}\left(0\right)$
+$\begin{aligned}
+D_{SB} & =2g^{2}\left(0\right) \\ 
+G &=\sum_{k=-\infty}^{\infty}|k|R\left(k\right). \\
+\end{aligned}$ 
 
-and 
-
-$G=\sum_{k=-\infty}^{\infty}|k|R\left(k\right).$ 
-
-Next, Politis and White (2004)[^PW2004] use the "flat-top" lag-window of Politis and Romano (1995) to estimate the infinite sums involved in the calculation of $G$ and $g(w)$. So, they provide a final estimator for the optimal block size: 
+Next, Politis and White (2004)[^PW2004] use the "flat-top" lag-window of Politis and Romano (1995)[^PR1995] to estimate the infinite sums involved in the calculation of $G$ and $g(w)$. So, they provide a final estimator for the optimal block size: 
 
 $\begin{aligned}
 \hat{g}\left(w\right) & =\sum_{k=-M}^{M}\lambda\left(k/M\right)\hat{R}\left(k\right)\cos\left(wk\right), \\
@@ -213,6 +225,8 @@ The expressions above for $D_{SB}$ were corrected by Patton, Politis and White (
 
 [^PW2004]: Politis, D. N., White, H. (2004). Automatic block-length selection for the dependent bootstrap. Econometric Reviews 23(1):53–70
 
+[^PR1995]: Politis, D. N., Romano, J. P. (1995). Bias-corrected nonparametric spectral estimation. J. Time Series Anal. 16:67–103.
+
 [^Lahiri1999]: Lahiri, S. N. (1999). Theoretical comparisons of block bootstrap methods. Annals of Statistics 27:386–404
 
 [^Nordman2008]: Nordman, D. J. (2008). A note on the stationary bootstrap's variance. Annals of Statistics
@@ -229,3 +243,20 @@ The Julia library computes the median by default to combine the different block 
 ## Concluding remarks
 
 <!-- to-do -->
+
+
+## Appendix: Normalized MSE interpretation 
+
+In the bootstrap world, let $\theta$ be an observed statistic and $\hat{\theta}$ be an estimator of such quantity.
+We can compute the standard deviation of the bootstrap sample distribution of $\hat{\theta}$, $\text{sd}\left(\hat\theta\right)$, to normalize the mean squared error. 
+Expanding this normalized MSE formula, we obtain: 
+
+$$\begin{aligned}
+\text{nMSE}\left(\hat{\theta}\right) & =\frac{1}{B}\sum_{b=1}^{B}\left[\frac{\hat{\theta}^{(b)}-\theta}{\text{sd}\left(\hat{\theta}\right)}\right]^{2}\\
+ & =\frac{1}{\text{Var}\left(\hat{\theta}\right)}\cdot\frac{1}{B}\sum_{b=1}^{B}\left(\hat{\theta}^{(b)}-\theta\right)^{2}\\
+ & =\frac{1}{\text{Var}\left(\hat{\theta}\right)}\cdot\text{MSE}\left(\hat{\theta}\right)\\
+ & =\frac{1}{\text{Var}\left(\hat{\theta}\right)}\cdot\left[\text{Var}\left(\hat{\theta}\right)+\text{Bias}\left(\hat{\theta}\right)^{2}\right]\\
+ & =1+\frac{\text{Bias}\left(\hat{\theta}\right)^{2}}{\text{Var}\left(\hat{\theta}\right)}
+\end{aligned}$$
+
+Thus, this measure is one (unitless) for unbiased estimators. In contrast, if the bias of the estimator is small, the $\text{nMSE}$ will be close to one. 
