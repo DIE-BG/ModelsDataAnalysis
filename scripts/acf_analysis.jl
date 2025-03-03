@@ -40,6 +40,7 @@ obs_autocor = autocor(mat_d4l_data, 0:L_autocor)
 sbb_bootstrap_samples_autocor = Array{eltype(mat_d4l_data)}(undef, L_autocor+1, K, L_block, B)
 mbb_bootstrap_samples_autocor = Array{eltype(mat_d4l_data)}(undef, L_autocor+1, K, L_block, B)
 
+
 # Function to fill array of resamples
 function resample_stats!(bootstrap_samples_autocor, method=:stationary, l=10)
     # Compute indices for block bootstrap
@@ -62,7 +63,6 @@ map(1:L_block) do l
     resample_stats!(mbb_bootstrap_samples_autocor, :moving, l)
 end; 
 
-
 ## Prototype a distribution figure 
 
 varnames = string.(propertynames(d4l_data))[begin+1:end]
@@ -70,47 +70,28 @@ k = 1
 l = 10
 
 
-function plot_acf_distribution(k, l, bootstrap_samples_autocor=bootstrap_samples_autocor)
-
-    fig = Figure(size=(950,550))
+function plot_acf_distribution(k, l, bootstrap_1, bootstrap_2,method_1 = "", method_2 = "")
+    # Plot 1
+    fig = Figure(size=(900,1200))
     title = varnames[k] * ", blocklength=$l"
     lt  = Label(fig[1,1], varnames[k], fontsize=18, font=:bold, tellwidth=false)
-    st  = Label(fig[2,1], L"\ell=%$(l)", fontsize=18, tellwidth=false)
+    st1 = Label(fig[2,1], method_1*": Length = $l", fontsize=18, tellwidth=false)
+#    st2  = Label(fig[3,1], L"\ell=%$(l)", fontsize=18, tellwidth=false)
     ax  = Axis(fig[3,1]) #, xlabel="Lag", ylabel="Autocorrelation")
-
-    # for j in 1:L_autocor+1
-    #     density!(
-    #         ax,
-    #         bootstrap_samples_autocor[j, k, l, :],
-    #         direction   = :y, 
-    #         offset  = j - 1, 
-    #         color   = (:slategray, 0.4), 
-    #         bandwidth = 0.05, 
-    #     )
-    # end
-
-    # violin!(
-    #     ax, 
-    #     1:L_autocor, 
-    #     bootstrap_samples_autocor[begin+1:end, k, l, :],
-    #     color   = (:slategray, 0.4), 
-    #     bandwidth = 0.05, 
-    #     datalimits = (-1.0, 1.0),
-    #     show_median = true,
-    #     mediancolor = (:slategray, 0.8),
-    # )
 
     for j in 1:L_autocor
         violin!(
             ax, 
             Iterators.repeated(j, B),
-            bootstrap_samples_autocor[begin+j, k, l, :],
+            bootstrap_1[begin+j, k, l, :],
             color   = (:slategray, 0.4), 
             bandwidth = 0.0125, 
             datalimits = (-1.0, 1.0),
             show_median = true,
             mediancolor = (:slategray, 0.8),
         )
+
+
     end
 
     stl = stem!(0:L_autocor, obs_autocor[:, k], trunkwidth=2, label="ACF")
@@ -119,18 +100,57 @@ function plot_acf_distribution(k, l, bootstrap_samples_autocor=bootstrap_samples
 
     dist_elem = PolyElement(color=(:slategray, 0.4))
     Legend(fig[4,1], [stl, dist_elem], ["Autocorrelation function", "Bootstrap distribution"], orientation=:horizontal, framevisible=false, tellwidth=false)
+    
+    # Plot 2
+    title = varnames[k] * ", blocklength=$l"
+    st1 = Label(fig[5,1], method_2*" "*": Length = $l", fontsize=18, tellwidth=false)
+ #  st2  = Label(fig[8,1], L"\ell=%$(l)", fontsize=18, tellwidth=false)
+    ax  = Axis(fig[6,1]) #, xlabel="Lag", ylabel="Autocorrelation")
+
+    for j in 1:L_autocor
+        violin!(
+            ax, 
+            Iterators.repeated(j, B),
+            bootstrap_2[begin+j, k, l, :],
+            color   = (:slategray, 0.4), 
+            bandwidth = 0.0125, 
+            datalimits = (-1.0, 1.0),
+            show_median = true,
+            mediancolor = (:slategray, 0.8),
+        )
+
+
+    end
+
+    stl = stem!(0:L_autocor, obs_autocor[:, k], trunkwidth=2, label="ACF")
+    ax.xticks = 0:L_autocor
+    ax.yticks = -1.0:0.2:1.
+
+    dist_elem = PolyElement(color=(:slategray, 0.4))
+    Legend(fig[7,1], [stl, dist_elem], ["Autocorrelation function", "Bootstrap distribution"], orientation=:horizontal, framevisible=false, tellwidth=false)
+
     fig
 end
 
-plot_acf_distribution(1, 10, sbb_bootstrap_samples_autocor)
-plot_acf_distribution(1, 10, mbb_bootstrap_samples_autocor)
+plot_acf_distribution(1, 10, mbb_bootstrap_samples_autocor, sbb_bootstrap_samples_autocor, "moving block bootstrap", "stationary block bootstrap")
+plot_acf_distribution(1, 10, mbb_bootstrap_samples_autocor, "Moving block bootstrap")
 
-# # Save plots for all variables
-# for k in 1:10, l in 1:40
-#     fig = plot_acf_distribution(1, 2, sbb_bootstrap_samples_autocor)
-#     filename = savename("acf", (variable=varnames[k], l=l, method="stationary"), "png", sort=false)
-#     save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
-# end
+
+
+
+mkpath(plotsdir(PLOTSDIR, "acf"))
+# Plots for variable and block length
+map((1, 5, 10, 15)) do l
+    for k in 1:length(varnames)
+
+        fig = plot_acf_distribution(k, l, mbb_bootstrap_samples_autocor, sbb_bootstrap_samples_autocor, "moving block bootstrap", "stationary block bootstrap")
+        filename = savename("acf", (variable=varnames[k], l=l), "png", sort = false)
+        save(plotsdir(PLOTSDIR, "acf",filename), fig, px_per_unit=2.0)
+
+    end
+end
+
+
 
 
 ## MSE analysis per variable

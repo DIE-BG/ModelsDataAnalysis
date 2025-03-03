@@ -113,8 +113,6 @@ The normalized MSE shows the same behavior for the MBB and SBB methods, with sli
 ![](images/simulation_study/cov/norm_cor_mse_method=stationary_moving.png)
 
 Consistently with others statistics the SBB method is the best to replicate the sample covariance matrix characteristics.
-<!-- Use the folder images/simulation_study for the images of the presentation -->
-
 
 ## Unified metric for comparing block bootstrap metrics
 
