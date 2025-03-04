@@ -1,7 +1,10 @@
-# Covariance Analysis
+# Correlation Analysis
 
-## Covariance between variables for Bootstrap of moving and stationary blocks
-We show the distribution of the covariance for all variables and a given length block. The moving block Bootrap is painted with blue color and the stationary one with orange. Note that the covariance distribution is almost the same for MBB and SBB methods in the first four blocks and the difference is more evident as the block size increases. This is consistent with the normalized MSE which is no longer similar for MBB and SBB starting from the 4th block.
+## Correlation between covariates for Moving and Stationary Block Bootstrap
+We show the distribution of the correlation coefficient for all variables and given block lengths. 
+The moving block bootstrap is shown in blue and the stationary in orange. 
+Note that the correlation distribution is very similar for both the MBB and SBB methods in the first four blocks, and the difference is more evident as the block length increases. 
+This is consistent with the normalized MSE which becomes significantly different for both methods starting from the block lengths greater than 4.
 
 ### Length = 1
 ![](images/simulation_study/cov/cor_l=1.png)

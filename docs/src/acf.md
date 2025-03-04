@@ -1,7 +1,7 @@
 # Autocorrelation Function Analysis
 
 ## Autocorrelation Functions of Moving and Stationary Block Bootstrap
-We show the autocorrelation functions for all variables and four length blocks (1, 5, 10 and 15) of Stationary and Moving Block Bootstrap.
+We show the autocorrelation functions for all variables and four different block lengths (1, 5, 10 and 15) for the stationary and moving block bootstrap methods.
 
 ### Real GDP of the US (D4L_GDP_RW)
 ![](images/acf/acf_variable=D4L_GDP_RW_l=1.png)
