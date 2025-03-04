@@ -23,6 +23,8 @@ makedocs(;
             "Detailed Results" => [
                 "mean.md",
                 "std.md",
+                "acf.md",
+                "covariance.md"
             ]
         ]
     ],
