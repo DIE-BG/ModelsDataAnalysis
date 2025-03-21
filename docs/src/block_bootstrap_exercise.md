@@ -77,7 +77,7 @@ For each bootstrap replication (pseudo time series for a given block length), we
 The idea is to compare the error that a given boostrap method (and its corresponding parametrization) gives in replicating the statistical properties of each time series. 
 
 We use a Mean Squared Error (MSE) loss function to measure the deviations of the bootstrap methods in producing the observed statistics. 
-The formula for the MSE of the statistic $\hat{\theta}_{i}^{m}\right$ of variable $i$ is given as follows: 
+The formula for the MSE of the statistic $\hat{\theta}_{i}^{m}$ of variable $i$ is given as follows: 
 
 $\text{MSE}\left(\hat{\theta}_{i}^{m}\right) =\frac{1}{B}\sum_{b=1}^{B}\left( \hat{\theta}_{i}^{m,(b)} - \theta_{i} \right)^2$
 

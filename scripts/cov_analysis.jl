@@ -155,9 +155,9 @@ mbb_mse_cor = map(l -> mse_cor(mbb_bootstrap_samples_cor, l), 1:L_block)
 norm_sbb_mse_cor = map(l -> norm_mse_cor(sbb_bootstrap_samples_cor, l), 1:L_block)
 norm_mbb_mse_cor = map(l -> norm_mse_cor(mbb_bootstrap_samples_cor, l), 1:L_block)
 
-# plot MSE
+## Plot MSE (unnormalized)
 fig = Figure(size=(950,550))
-lt  = Label(fig[1,1], "Block Bootstrap MSE of lower triangular covariance matrix", fontsize=18, font=:bold, tellwidth=false)
+lt  = Label(fig[1,1], "Block Bootstrap MSE of lower triangular correlation matrix", fontsize=18, font=:bold, tellwidth=false)
 st  = Label(fig[2,1], "", fontsize=18, tellwidth=false)
 ax  = Axis(fig[3,1], xlabel="Block length", ylabel="Mean Squared Error")
 
@@ -168,18 +168,21 @@ filename = savename("cor_mse", (method="stationary_moving",), "png", sort=false)
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
 
-# plot Normalized MSE
+## Plot Normalized MSE
+
 fig = Figure(size=(1200,550))
 # Moving
 ax  = Axis(fig[1,1], xlabel="Block length", ylabel="Mean Squared Error",
-            title = "Average normalized MSE of lower triangular covariance matrix",
+            title = "Average normalized MSE of lower triangular correlation matrix",
             subtitle = "Moving")
 lines!(ax, 1:L_block, norm_mbb_mse_cor, linewidth=2)
+ylims!(ax, 1, 1.6)
 
 ax  = Axis(fig[1,2], xlabel="Block length", ylabel="Mean Squared Error",
-            title = "Average normalized MSE of lower triangular covariance matrix",
+            title = "Average normalized MSE of lower triangular correlation matrix",
             subtitle = "Stationary")
 lines!(ax, 1:L_block, norm_sbb_mse_cor, linewidth=2)
+ylims!(ax, 1, 1.6)
 filename = savename("norm_cor_mse", (method="stationary_moving",), "png", sort=false)
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
