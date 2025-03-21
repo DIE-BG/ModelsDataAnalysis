@@ -17,9 +17,16 @@ makedocs(;
     # By default all markdown files in `docs/src` are expanded and included.
     pages = [
         "index.md",
-        "periodogram.md",
-        "mean.md",
-        "std.md"
+        "Frequency Analysis" => "periodogram.md",
+        "Block Bootstrap" => [
+            "Simulation Study" => "block_bootstrap_exercise.md"
+            "Detailed Results" => [
+                "mean.md",
+                "std.md",
+                "acf.md",
+                "covariance.md"
+            ]
+        ]
     ],
     # Don't worry about what `CI` does in this line.
     format = Documenter.HTML(prettyurls = CI),

@@ -107,7 +107,7 @@ function unified_metric(
     dict_bb_samples::Dict, l::Int; 
     variable_agg_fn=mean, 
     autocor_agg_fn=autocor_agg_exp_fn, 
-    cor_agg_fn=mean
+    cor_agg_fn=(m -> 2 * sum(m) / (K * (K-1)))
     ) 
 
     # Get the arrays for block length l
@@ -144,14 +144,14 @@ function unified_metric(
     # Evaluation mask to obtain lower triangular elements of the correlation matrices
     eval_mask = tril(repeat([true], K, K), -1)
     # Normalized MSE for the correlation estimator of each variable, from 1 to L_autocor lags
-    mse_autocor_lags_variable = mean(sqr, eval_mask .* ((cor_array .- obs_cor) ./ std_cor), dims=3)
+    mse_cor_matrix = mean(sqr, eval_mask .* ((cor_array .- obs_cor) ./ std_cor), dims=3)
     # Normalized MSE of method 
-    mse_cor = cor_agg_fn(mse_autocor_variable)
+    mse_cor = cor_agg_fn(mse_cor_matrix)
 
     mse_mean, mse_var, mse_autocor, mse_cor
 end
 
-# tt = unified_metric(mbb_dict, 10, cor_agg_fn=mean)
+# tt = unified_metric(mbb_dict, 90)
 
 # Compute statistics for each block length
 sbb_stats_metrics = zeros(L_block, 4)
@@ -167,10 +167,10 @@ end
 
 ## Plot unified metrics 
 
-fig = Figure(size=(950,550))
-lt  = Label(fig[1,1:2], "Normalized MSE for each type of metrics", fontsize=18, font=:bold, tellwidth=false)
-ax1  = Axis(fig[2,1], title="Stationary Block Bootstrap")
-ax2  = Axis(fig[2,2], title="Moving Block Bootstrap")
+fig = Figure(size=(950,450))
+lt  = Label(fig[1,1:2], "Components of the Normalized MSE for Block Bootstrap Methods", fontsize=18, font=:bold, tellwidth=false)
+ax1  = Axis(fig[2,1], title="Stationary", xlabel="Block length")
+ax2  = Axis(fig[2,2], title="Moving", xlabel="Block length")
 
 lines!(ax1, 1:L_block, sbb_stats_metrics[:, 1], label="Mean")
 lines!(ax1, 1:L_block, sbb_stats_metrics[:, 2], label="Variance")
@@ -184,22 +184,38 @@ lines!(ax2, 1:L_block, mbb_stats_metrics[:, 3], linewidth=2, label="Autocorrelat
 lines!(ax2, 1:L_block, mbb_stats_metrics[:, 4], linewidth=3, linestyle=:dash, label="Correlation")
 axislegend(ax2)
 
-filename = savename("unified_metrics_components", (method="stationary_moving",), "png")
+linkyaxes!(ax1, ax2)
+# hideydecorations!(ax2)
+
+params = @ntuple method="stationary_moving" L_block L_autocor B
+filename = savename("unified_metrics_components", params, "png")
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
 
+## Plot unified metric components without the autocorrelation 
 
-## Compare the sum of the metrics
+fig = Figure(size=(950,450))
+lt  = Label(fig[1,1:2], "Components of the Normalized MSE for Block Bootstrap Methods", fontsize=18, font=:bold, tellwidth=false)
+ax1  = Axis(fig[2,1], title="Stationary", xlabel="Block length")
+ax2  = Axis(fig[2,2], title="Moving", xlabel="Block length")
 
-fig = Figure(size=(950,550))
-lt  = Label(fig[1,1], "Normalized MSE block bootstrap methods", fontsize=18, font=:bold, tellwidth=false)
-ax  = Axis(fig[2,1])
+lines!(ax1, 1:L_block, sbb_stats_metrics[:, 1], label="Mean")
+lines!(ax1, 1:L_block, sbb_stats_metrics[:, 2], label="Variance")
+# lines!(ax1, 1:L_block, sbb_stats_metrics[:, 3], linewidth=2, label="Autocorrelation")
+lines!(ax1, 1:L_block, sbb_stats_metrics[:, 4], linewidth=3, linestyle=:dash, label="Correlation")
+axislegend(ax1, position=:lt)
 
-lines!(ax, 1:L_block, sum(sbb_stats_metrics, dims=2) |> vec, label="Stationary")
-lines!(ax, 1:L_block, sum(mbb_stats_metrics, dims=2) |> vec, label="Moving")
-axislegend(ax)
+lines!(ax2, 1:L_block, mbb_stats_metrics[:, 1], label="Mean")
+lines!(ax2, 1:L_block, mbb_stats_metrics[:, 2], label="Variance")
+# lines!(ax2, 1:L_block, mbb_stats_metrics[:, 3], linewidth=2, label="Autocorrelation")
+lines!(ax2, 1:L_block, mbb_stats_metrics[:, 4], linewidth=3, linestyle=:dash, label="Correlation")
+axislegend(ax2, position=:lt)
 
-filename = savename("unified_metrics", (method="stationary_moving",), "png")
+# Synchronize the axes
+linkyaxes!(ax1, ax2)
+
+params = @ntuple method="stationary_moving" L_block L_autocor B
+filename = savename("unified_metrics_components_nacf", params, "png")
 save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
 fig
 
@@ -215,12 +231,11 @@ threshold_sbb_mse = sbb_min_mse + (1-beta) * (sbb_max_mse - sbb_min_mse)
 sbb_l = findfirst(<=(threshold_sbb_mse), sbb_mse)
 @info "SBB block size for β=$beta is L=$sbb_l"
 
-
 mbb_mse = sum(mbb_stats_metrics, dims=2) |> vec
 mbb_min_mse, mbb_max_mse = extrema(mbb_mse)
 threshold_mbb_mse = mbb_min_mse + (1-beta) * (mbb_max_mse - mbb_min_mse)
 
-mbb_l = findfirst(<=(threshold_sbb_mse), sbb_mse)
+mbb_l = findfirst(<=(threshold_mbb_mse), mbb_mse)
 @info "MBB block size for β=$beta is L=$mbb_l"
 
 # [ Info: SBB block size for β=0.9 is L=6
@@ -229,3 +244,46 @@ mbb_l = findfirst(<=(threshold_sbb_mse), sbb_mse)
 # [ Info: MBB block size for β=0.9 is L=6
 # [ Info: MBB block size for β=0.95 is L=10
 # [ Info: MBB block size for β=0.99 is L=24
+
+mbb_l_star = findfirst(<=(mbb_min_mse), mbb_mse)
+
+## Compare the sum of the metrics
+
+fig = Figure(size=(950,450))
+lt  = Label(fig[1,1], "Unified Normalized MSE for Block Bootstrap Methods", fontsize=18, font=:bold, tellwidth=false)
+ax  = Axis(fig[2,1], xlabel="Block length")
+
+lines!(ax, 1:L_block, sbb_mse, label="Stationary", linewidth=2)
+lines!(ax, 1:L_block, mbb_mse, label="Moving", linewidth=2)
+hlines!(ax, sbb_mse[sbb_l], color=(:gray, 0.6), linestyle=:dash)
+scatter!(ax, [sbb_l], [sbb_mse[sbb_l]], 
+    label="SBB $(ft1(100*beta))% of total decrease", 
+    markersize=14, 
+    color=:blue,
+)
+scatter!(ax, [mbb_l_star], [mbb_min_mse], 
+    label="MBB minimum",
+    markersize=14, 
+    color=:orange
+)
+axislegend(ax)
+
+ylims!(ax, 0, 27)
+ax.yticks = 0:2:28
+ax.xticks = 0:2:L_block
+
+params = @ntuple method="stationary_moving" L_block L_autocor B beta
+filename = savename("unified_metrics", params, "png")
+save(plotsdir(PLOTSDIR, filename), fig, px_per_unit=2.0)
+fig
+
+
+fig = Figure(size = (900, 650))
+ax = Axis(fig[1,1], title = "MSE of covariance matrix")
+
+lines!(ax, 1:length(mbb_stats_metrics[:,4]), mbb_stats_metrics[:,4])
+lines!(ax, 1:length(sbb_stats_metrics[:,4]), sbb_stats_metrics[:,4])
+
+fig
+
+
