@@ -1,0 +1,48 @@
+---
+title: "Métodos de Bootstrap para datos con dependencia temporal"
+subtitle: "Ejercicio de simulación"
+author: Rodrigo Chang y Jorge Orenos
+date: last-modified
+date-format: long
+lang: es
+
+engine: julia 
+execute: 
+    daemon: 7200
+
+format: 
+    pptx:
+        echo: false
+        reference-doc: templateDIE.pptx
+        fig-dpi: 200
+        slide-level: 2
+
+bibliography: references.bib
+---
+
+# Introducción
+En esta sección se presentación se detallará el principal objetivo del ejercicio de simulación haciendo uso de los métodos
+de Bootstrap para datos con dependencia temporal. (1 diapositiva)
+{{< include parts/_introduccion.qmd >}}
+
+# Métodos de Bootstrap
+Aquí se va a detallar los dos métodos usados para el ejercicio de simulación. Moving y Stationary Block Bootstrap. La explicación
+debe ser concisa tal cualestá en la documentación que se realizó. (2 a 4 diapositivas)
+{{< include parts/_metodos.qmd >}}
+
+# Ejercicio básico de simulación
+Una descripción de las variables de las cuales se quiere hacer una mímica de sus características estadísticas de interés para la 
+evaluación, así como la descripción de los estadisticos 2 dipositiva (-1 para variables y estadísticos y la segunda para presentar la medida de error utilizada-)
+{{< include parts/_ejercicio.qmd >}}
+
+# Resultados
+presentación de los resultados agreagados para la media, varianza, función de autocorrelación y matriz de correlaciones. (4-8 diapositivas)
+{{< include parts/_resultados.qmd >}}
+
+# Criterio para tamaño óptimo de bloque
+Criterio de selección del tamaño óptimo de bloque para Moving y Stationary Block Bootstrap y un comparativo con el propuesto por la literatura
+-Patton, Politis y White 2009- (2 diapositivas)
+{{< include parts/_tamaño_bloque.qmd >}}
+
+## Referencias
+(1 diapositiva)
