@@ -110,9 +110,9 @@ We will show the results of applying the two block bootstrap methods and calcula
 - The first plot shows the average of the original MSE of all series and the second one the normalized MSE.
 
 ::: {layout-ncol=2}
-![](images/simulation_study/mean/all_MSE.png)
+![](plots/mean/all_MSE.png)
 
-![](images/simulation_study/mean/all_normalized_MSE.png)
+![](plots/mean/all_normalized_MSE.png)
 :::
 
 We note that in both cases the best method is the stationary. 
@@ -123,9 +123,9 @@ However, for the normalized MSE and for all possible block lengths, the mean est
  we follow a similar procedure for comparing between block bootstrap methods as the one used for the sample mean.
 
 ::: {layout-ncol=2}
-![](images/simulation_study/variance/all_MSE.png)
+![](plots/variance/all_MSE.png)
 
-![](images/simulation_study/variance/all_normalized_MSE.png)
+![](plots/variance/all_normalized_MSE.png)
 :::
 
 In both cases we prefer the SBB method as the most apropiate method to replicate the sample variance for most block lengths.
@@ -149,12 +149,25 @@ In both cases we prefer the SBB method as the most apropiate method to replicate
 ::::
 
 ::: {layout-ncol=2}
-![](images/simulation_study/autocorr/agg_acf_mse_method=stationary_moving.png)
+![](plots/autocorrelation/agg_acf_mse_method=stationary_moving.png)
 
-![](images/simulation_study/autocorr/agg_acf_norm_mse_method=stationary_moving.png)
+![](plots/autocorrelation/agg_acf_norm_mse_method=stationary_moving.png)
 :::
 
 For both the MBB and the SBB (and for their normalized version of the MSE), the error decays significantly in the first 10 possible block lengths. This property is very important because it tells us about a continuously decaying error for the SBB and a minimum error in the MBB method.
+
+# correlation matrix -results-
+## Results of the sample correlation matrix
+In the same way as the autocorrelation function, the correlation matrix adds an additional dimension to the analysis to determine the error with respect to the sample correlation matrix.
+
+::: {layout-ncol=2}
+![](plots/covariance/cor_mse_method=stationary_moving.png)
+
+![](plots/covariance/norm_cor_mse_method=stationary_moving.png)
+:::
+
+Consistent with others statistics, the SBB method is the best to replicate the sample correlation matrix characteristics for the different block lengths.
+
 
 
 # Comparison with literature on optimal block size
