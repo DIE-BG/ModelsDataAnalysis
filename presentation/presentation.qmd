@@ -1,7 +1,11 @@
 ---
 title: "Métodos de Bootstrap para datos con dependencia temporal"
 subtitle: "Ejercicio de simulación"
-author: Rodrigo Chang y Jorge Orenos
+author:
+  - name: Rodrigo Chang
+    email: rrcp@banguat.gob.gt
+  - name: Jorge Orenos
+    email: jgor@banguat.gob.gt
 date: last-modified
 date-format: long
 lang: es
@@ -11,6 +15,13 @@ execute:
     daemon: 7200
 
 format: 
+    clean-revealjs: 
+        echo: false
+        # smaller: true
+        scrollable: true
+        toc: false
+        fig-dpi: 200
+        # code-fold: true
     pptx:
         echo: false
         reference-doc: templateDIE.pptx
@@ -18,19 +29,22 @@ format:
         slide-level: 2
 
 bibliography: references.bib
+nocite: |
+    @*
 ---
 
-## introduction
+# Introduction 
+## Introduction
 - We present an ad-hoc simulation study for the variables used in the macroeconomic models at DIE-BG. In our quest to assess the macroeconomic models in a robust manner, we aim to generate pseudo-test data using block bootstrap methods. This data can then be used to mimic fresh evaluation data to perform pseudo out-of-sample forecasting. 
 - The purpose of the simulation study presented here is to **find suitable block lengths** for the stationary and moving block bootstrap methods.
 
+# Block Bootstrap Methods
 ## Bootstrap Methods
 - In the literature, we can find different methods for dependent data. 
 - Some of them are regarded as "first generation methods" and take as basis fixed-length blocks or variable-length blocks of observations from the original time series.
 - Blocks are resampled in an independent manner until forming a replication of the time series (usually of the same length as the original sample).
 - We present a brief description of these methods.
 
-# Moving Block Bootstrap
 ## Moving Block Bootstrap (MBB)
 - We start from a given sample $X_n \equiv \{X_1,...,X_n\}$ of size $n$. Then, we define a block of length $l$, with $l$ being a number that satisfies $1\leq l  \leq n$.
 - Once we have defined the block length, we form different blocks of length $l$ contained in $X_n$ as follows.
@@ -44,14 +58,13 @@ B_{N} & =\left(X_{n-l+1},...,X_{n}\right)
 
 where $N = n-l+1$ denotes the number of total blocks of length $l$ that will be formed and over which the bootstrap will be applied, allowing overlapping of the blocks in each iteration until the original sample length is reached.
 
-# Stationary Block Bootstrap
 ## Stationary Block Bootstrap (SBB)
 - The SBB method shares with the MBB the characteristic of working with blocks of time series that, when joined together, generate a "single block" of length $N$ as in the original sample.
 - The difference between the SBB and the MBB is that the block length in the SBB changes at each iteration, and in the MBB, the length is fixed. The algorithm as follows:
 
 Let $X_1^*$ be an observation *drawn at **random** from the original $N$ observations*. $X_1^*$ is the **first observation** of the first block, so $X_1^*$ is defined as $X_1^* = X_{I_1}$. The next one has probability $p$ of being randomly drawn from the original $N$ observations and probability $1-p$ of being $X_2^* = X_{I_1+1}$ which be the next one in the original sample. The process ends when the $X_j^*$ is to be drawn at random from the original $N$ observations, this being the first observation of the next block. The iteration ends when we have a number of blocks that being joined together formed a "single block" of length $N$. So, the average length of the blocks is $1/p$.
 
-# Data for macoroeconomic models
+# Data for the macroeconomic models
 ## Basic Simulation Exercise
 - In our exercise, the objetive is to sample pseudo datasets using bootstrapping methods on the time series used for building macroeconomic models.
 
@@ -71,8 +84,10 @@ The time series considered are year-on-year rates of change, in quarterly freque
 7. Exchange rate (GTQ/USD) (D4L\_S)
 8. Monetary base (D4L\_MB)
 9. Monetary policy rate (RS)
-:::Removed extra .qmd scripts
+:::
 ::::
+
+--- 
 
 To check the correct replication of the statistical properties, we computed important statistics for our purposes. These are:
 
@@ -88,13 +103,14 @@ To check the correct replication of the statistical properties, we computed impo
 :::
 ::::
 
-# Error Measure
-## Normalized Mean Square Error
+## Normalized Mean Squared Error
 - We use a Mean Squared Error (MSE) loss function to measure the deviations of the bootstrap methods in producing the observed statistics. 
 
 $\text{MSE}\left(\hat{\theta}_{i}^{m}\right) =\frac{1}{B}\sum_{b=1}^{B}\left( \hat{\theta}_{i}^{m,(b)} - \theta_{i} \right)^2$
 
 Where $\theta_{i}$ is the sample statistic in the actual sample. (This is the population parameter in the bootstrap universe.)
+
+--- 
 
 - The MSE is a scale-dependent measure, and thus, their units depend on the statistic we would compute the MSE. For this reason we propose using a normalized MSE, which transforms the MSE by the standard deviation of the estimator in all replications.
 
@@ -102,35 +118,40 @@ $\text{nMSE}\left(\hat{\theta}_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left[\fr
 
 - This modification allows us aggregating the error for statistics of different scales.
 
+# Results
 ## Results
 We will show the results of applying the two block bootstrap methods and calculating their errors using the Normalized Mean Squared Error.
 
-# Mean -results-
+<!-- Mean -results- -->
 ## Results for the sample mean
 - The first plot shows the average of the original MSE of all series and the second one the normalized MSE.
 
-::: {layout-ncol=2}
-![](plots/mean/all_MSE.png)
+## Results for the sample mean
 
-![](plots/mean/all_normalized_MSE.png)
-:::
+![](../plots/mean/all_MSE.png)
+
+## Results for the sample mean
+
+![](../plots/mean/all_normalized_MSE.png)
+
+## Results for the sample mean
 
 We note that in both cases the best method is the stationary. 
 However, for the normalized MSE and for all possible block lengths, the mean estimator obtained by the SBB is consistently closer to one, which means that the estimator has low bias for every block length $l$ considered.
 
-# Variance -results-
+<!-- # Variance -results- -->
 ## Results for the sample variance
  we follow a similar procedure for comparing between block bootstrap methods as the one used for the sample mean.
 
 ::: {layout-ncol=2}
-![](plots/variance/all_MSE.png)
+![](../plots/variance/all_MSE.png)
 
-![](plots/variance/all_normalized_MSE.png)
+![](../plots/variance/all_normalized_MSE.png)
 :::
 
 In both cases we prefer the SBB method as the most apropiate method to replicate the sample variance for most block lengths.
 
-# autocorrelation function -results-
+<!-- # autocorrelation function -results- -->
 ## Results of the sample autocorrelation function
 - For the autocorrelation fuction analysis we have an additional dimension (i.e. the lags of the autocorrelation function entries) to determine the error with respect to the sample autocorrelation function.
 
@@ -148,22 +169,24 @@ In both cases we prefer the SBB method as the most apropiate method to replicate
 :::
 ::::
 
-::: {layout-ncol=2}
-![](plots/autocorrelation/agg_acf_mse_method=stationary_moving.png)
 
-![](plots/autocorrelation/agg_acf_norm_mse_method=stationary_moving.png)
-:::
+## Results of the sample autocorrelation function
+![](../plots/autocorrelation/agg_acf_mse_method=stationary_moving.png)
 
+## Results of the sample autocorrelation function
+![](../plots/autocorrelation/agg_acf_norm_mse_method=stationary_moving.png)
+
+## Results of the sample autocorrelation function
 For both the MBB and the SBB (and for their normalized version of the MSE), the error decays significantly in the first 10 possible block lengths. This property is very important because it tells us about a continuously decaying error for the SBB and a minimum error in the MBB method.
 
-# correlation matrix -results-
+<!-- # correlation matrix -results- -->
 ## Results of the sample correlation matrix
 In the same way as the autocorrelation function, the correlation matrix adds an additional dimension to the analysis to determine the error with respect to the sample correlation matrix.
 
 ::: {layout-ncol=2}
-![](plots/covariance/cor_mse_method=stationary_moving.png)
+![](../plots/covariance/cor_mse_method=stationary_moving.png)
 
-![](plots/covariance/norm_cor_mse_method=stationary_moving.png)
+![](../plots/covariance/norm_cor_mse_method=stationary_moving.png)
 :::
 
 Consistent with others statistics, the SBB method is the best to replicate the sample correlation matrix characteristics for the different block lengths.
@@ -171,6 +194,7 @@ Consistent with others statistics, the SBB method is the best to replicate the s
 
 
 # Comparison with literature on optimal block size
+## Comparison with literature on optimal block size
 Optimal block size selection criteria for Moving and Stationary Block Bootstrap and a comparison with the one proposed by the literature -Patton, Politis and White 2009- (2 slides)
 
 ## References
