@@ -71,7 +71,7 @@ The time series considered are year-on-year rates of change, in quarterly freque
 7. Exchange rate (GTQ/USD) (D4L\_S)
 8. Monetary base (D4L\_MB)
 9. Monetary policy rate (RS)
-:::
+:::Removed extra .qmd scripts
 ::::
 
 To check the correct replication of the statistical properties, we computed important statistics for our purposes. These are:
