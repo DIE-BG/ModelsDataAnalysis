@@ -82,7 +82,7 @@ $$X_{n}^{*} = \{B_1, B_1, B_2\}$$
 - The algorithm is as follows:
 
 1. Let $X_1^*$ be an observation *drawn at **random** from the original $N$ observations*.
-2. Sample a random block length $l \sim $ Geometric$(p)$. 
+2. Sample a random block length $l$ from a Geometric$(p)$. 
 3. Take the block of length $l$ starting at $X_1^*$. 
 4. Repeat steps 1-3 until forming a new time series $X_{n}^*$. 
 
