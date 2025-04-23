@@ -236,21 +236,21 @@ $$\text{unMSE}\left(m\right)=\text{nMSE}\left(\hat{\mu}^{m}\right)+\text{nMSE}\l
 ## Results of Unified nMSE
 In the following figure, we plot the four components of the unified metric as a function of the block length:
 
-![](plots/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+![](../plots/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
 
 We can see that the autocorrelation dominates the normalized error decomposition because the bias is too high for small block lengths.
 
 ## Results of Unified nMSE
 We show the behavior of the other three components:
 
-![](plots/unified/unified_metrics_components_nacf_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+![](../plots/unified/unified_metrics_components_nacf_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
 
 Then, we compute the sum of the four components to get the unified metric.
 
 ## Results of Unified nMSE
 As we can see in the figure below, the total error decays quickly with the block length for both block methods. The MBB exhibits a minimum at $l=19$. Althought the SBB does not exhibit a minimum value, we find that 95% of the total decrease in the error occurs at a block length $l=10$.
 
-![](plots/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
+![](../plots/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
 
 ---
 
@@ -284,7 +284,7 @@ $$\text{MSE}\left(\hat{\sigma}_{b,SB}^{2}\right)=\frac{G^{2}}{b^{2}}+D_{SB}\frac
 
 ## Results of Patton, Politis and White method
 
-![](plots/optblocklength/ppw2009_optimal_block_length_data=dla.png)
+![](../plots/optblocklength/ppw2009_optimal_block_length_data=dla.png)
 
 
 
