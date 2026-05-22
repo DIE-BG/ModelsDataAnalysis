@@ -1,0 +1,408 @@
+---
+title: "Block bootstrap methods for the macroeconomic data"
+subtitle: "A simulation study"
+author:
+  - name: Rodrigo Chang
+    email: rrcp@banguat.gob.gt
+  - name: Jorge Orenos
+    email: jgor@banguat.gob.gt
+date: last-modified
+date-format: long
+lang: en
+
+# engine: julia 
+# execute: 
+#     daemon: 7200
+
+format: 
+    clean-revealjs: 
+        echo: false
+        # smaller: true
+        scrollable: true
+        toc: false
+        fig-dpi: 200
+        # code-fold: true
+    pptx:
+        echo: false
+        reference-doc: templateDIE.pptx
+        fig-dpi: 200
+        slide-level: 2
+
+bibliography: references.bib
+nocite: |
+    @*
+---
+
+# Introduction
+## Introduction
+- We present an ad-hoc simulation study for the variables used in the macroeconomic models at DIE-BG. 
+- In our quest to assess the macroeconomic models in a robust manner, we aim to generate pseudo-test data using block bootstrap methods. This data can then be used to mimic fresh evaluation data to perform pseudo out-of-sample forecasting. 
+- The purpose of the simulation study presented here is to **find suitable block lengths** for both the stationary and moving block bootstrap methods.
+
+## Bootstrap Methods
+- In the literature, we can find different methods for dependent data. 
+- Some of them are regarded as "first generation methods" and take as basis fixed-length blocks or variable-length blocks of observations from the original time series.
+- Blocks are resampled in an independent manner until forming a replication of the time series (usually of the same length as the original sample).
+- We present a brief description of these methods.
+
+## Moving Block Bootstrap (MBB)
+- We start from a given sample $X_n \equiv \{X_1,...,X_n\}$ of size $n$. Then, we define a block of length $l$, with $l$ being a number that satisfies $1\leq l  \leq n$.
+- Once we have defined the block length, we form different blocks of length $l$ contained in $X_n$ as follows.
+
+$$\begin{aligned}
+B_{1} & =\left(X_{1},X_{2},...,X_{l}\right)\\
+B_{2} & =\left(X_{2},X_{3},...,X_{l+1}\right)\\
+\vdots & =\vdots\\
+B_{N} & =\left(X_{n-l+1},...,X_{n}\right)
+\end{aligned}$$
+
+where $N = n-l+1$ denotes the number of total blocks of length $l$. 
+
+--- 
+
+- To form the time series, we sample the blocks (allowing for repetition) until the original sample legnth is reached. 
+
+- For example, if $n=5$ and $l=3$, one resample of the time series could be: 
+$$X_{n}^{*} = \{B_1, B_2, B_3\}$$
+
+- Another could be: 
+$$X_{n}^{*} = \{B_1, B_1, B_2\}$$
+
+--- 
+
+## Stationary Block Bootstrap (SBB)
+- In the SBB, the block length is a random variable. 
+- It is sampled at every block resample, 
+  - In the MBB, the block length is fixed. 
+- The block length follows a geometric distribution with parameter $p$. 
+    - The expected block length is $1/p$. 
+
+## Stationary Block Bootstrap (SBB)
+
+- The algorithm is as follows:
+
+1. Let $X_1^*$ be an observation *drawn at **random** from the original $N$ observations*.
+2. Sample a random block length $l$ from a Geometric$(p)$. 
+3. Take the block of length $l$ starting at $X_1^*$. 
+4. Repeat steps 1-3 until forming a new time series $X_{n}^*$. 
+
+# Definition of the Simulation Exercise
+## Basic Simulation Exercise
+- In our exercise, the objective is to sample pseudo-datasets using bootstrapping methods on the time series used for building macroeconomic models.
+
+- We want to quantify how well a given bootstrap method replicates the sample statistics from the data. 
+    - We'll define a metric to measure this.
+
+- In this exercise, we compare the **stationary** bootstrap to the **moving block** bootstrap. 
+
+## Basic Simulation Exercise
+
+- The evaluation algorithm we use is as follows: 
+
+- For a given bootstrap method $m$: 
+
+1. For $b$ in $1, \ldots, B$: 
+    1. Sample the time series $X_{i}^{m}$ with method $m$. 
+    2. Compute the $b$-th boostrap statistic $\theta_{i}^{m, (b)}$.
+2. With the $B$ replications: 
+   1. Compute a similitude metric, such as the MSE. 
+
+
+## Economic Variables Involved
+The time series considered are year-on-year rates of change, in quarterly frequency, of the following variables:
+
+::::{.columns}
+:::{.column}
+1. Real GDP of the US (D4L\_GDP\_RW)
+2. PCE core inflation (D4L\_CPI\_RW)
+3. Effective Federal Funds Rate (RS\_RW)
+4. Domestic real GDP (D4L\_GDP)
+5. Total domestic inflation (D4L\_CPI)
+:::
+
+:::{.column}
+6. Domestic core inflation (D4L\_CPIXFE)
+7. Exchange rate (GTQ/USD) (D4L\_S)
+8. Monetary base (D4L\_MB)
+9. Monetary policy rate (RS)
+:::
+::::
+
+## Sample Statistics
+
+To check the correct replication of the statistical properties, we computed important statistics for our purposes. These are:
+
+::::{.columns}
+:::{.column}
+1. The sample mean of each of the time series.
+2. The variance of each of the time series.
+:::
+
+:::{.column}
+3. The autocorrelation fuction up to 12 lags (or 3 years in quarterly frequency).
+4. The correlation matrix between covariates.
+:::
+::::
+
+## Mean Squared Error
+- We use a Mean Squared Error (MSE) loss function to measure the deviations of the bootstrap methods in producing the observed statistics. 
+
+- For a given variable $i$ and bootstrap method $m$, we have: 
+
+$$\text{MSE}\left(\hat{\theta}_{i}^{m}\right) =\frac{1}{B}\sum_{b=1}^{B}\left( \hat{\theta}_{i}^{m,(b)} - \theta_{i} \right)^2$$
+
+where $\theta_{i}$ is the sample statistic in the actual sample. (This is the population parameter in the bootstrap universe.)
+
+## Normalized Mean Squared Error
+
+- **The MSE is a scale-dependent measure**, and thus, their units depend on the statistic we would compute the MSE. For this reason we propose using a normalized MSE, which transforms the MSE dividing by the standard deviation of the estimator in all the replications.
+
+$$\text{nMSE}\left(\hat{\theta}_{i}^{m}\right)=\frac{1}{B}\sum_{b=1}^{B}\left[\frac{\hat{\theta}_{i}^{m,(b)}-\theta_{i}}{\text{sd}\left(\hat{\theta}_{i}^{m}\right)}\right]^{2}$$
+
+- This modification allows us aggregating the error for statistics of different scales.
+
+# Individual Results
+## Results
+- We show the results of applying the two block bootstrap methods and calculating their errors using the Normalized Mean Squared Error.
+
+<!-- Mean -results- -->
+## Results for the sample mean - MSE
+
+![](figures/all_MSE.png){#fig-mean-mse}
+
+- The first plot shows the average of the original MSE of all the series as a function of the block length used in the resample. 
+
+## Results for the sample mean - nMSE
+
+![](figures/all_normalized_MSE.png){#fig-mean-nmse}
+
+- Here, we have the normalized MSE averaged across all the series as a function of the block length. 
+
+## Results for the sample mean
+
+- Using the normalized MSE, and for all possible block lengths, **the mean estimator obtained by the SBB is consistently closer to the sample mean**, which means that the estimator has low bias for every block length $l$ considered.
+
+<!-- # Variance -results- -->
+## Results for the sample variance
+- We follow a similar procedure to compare between block bootstrap methods as the one used for the sample mean.
+
+- In both cases we prefer the SBB method as the most apropiate method to replicate the sample variance for most block lengths.
+
+## Results for the sample variance - MSE
+![](figures/all_MSE.png){#fig-variance-mse}
+
+## Results for the sample variance - nMSE
+![](figures/all_normalized_MSE.png){#fig-variance-nmse}
+
+
+<!-- # autocorrelation function -results- -->
+## Results of the sample autocorrelation function
+- For the autocorrelation fuction analysis we have an additional dimension (i.e. the lags of the autocorrelation function entries) to determine the error with respect to the sample autocorrelation function.
+
+- In our excercise we consider only 12 lags to generate the sample autocorrelation function. In particular we have an array of dimension $13 \times 10 \times 40 \times 10000$:
+
+::::{.columns}
+:::{.column}
+- 12 lags (plus lag 0).
+- 10 variables
+:::
+
+:::{.column}
+- 40 possible block lengths
+- 10,000 pseudo time series (block bootstrap series)
+:::
+::::
+
+
+## Sample autocorrelation function - MSE
+![](figures/agg_acf_mse_method=stationary_moving.png){#fig-autocorr-mse}
+
+## Sample autocorrelation function - nMSE
+![](figures/agg_acf_norm_mse_method=stationary_moving.png){#fig-autocorr-nmse}
+
+## Sample autocorrelation function
+- For both the MBB and the SBB (and for their normalized version of the MSE), **the error decays significantly in the first 10 possible block lengths**. 
+- This property is very important because it suggests a continuously decaying error for the SBB and a minimum error in the MBB method.
+
+<!-- # correlation matrix -results- -->
+## Sample correlation matrix
+- In the same way as the autocorrelation function, the correlation matrix adds an additional dimension to the analysis to determine the error with respect to the sample correlation matrix.
+
+## Sample correlation matrix - MSE
+![](figures/cor_mse_method=stationary_moving.png){#fig-corr-mse}
+
+## Sample correlation matrix - nMSE
+![](figures/norm_cor_mse_method=stationary_moving.png){#fig-corr-nmse}
+
+## Results of the sample correlation matrix
+- Consistent with the other statistics, **the SBB method is the best to replicate the sample correlation matrix** for the different block lengths.
+
+# Unified Results
+## Unified metric for comparing block bootstrap metrics
+- We have four different main statistics that we are concerned the bootstrap samples replicate from the dataset. 
+- We propose comparing between block bootstrap methods (and possibly other resampling methodologies) using **an aggregation of the normalized MSEs** for: 
+
+1. Mean
+2. Variance
+3. Autocorrelation function
+4. Correlation matrix between covariates
+
+## Unified nMSE for the mean
+- Hereafter, let $i$ index a variable and $m$ a block bootstrap method.
+- Let $\hat\mu_{i}^{m}$ the sample mean estimator. 
+- We form the mean component of the unified metric by averaging over covariates:
+
+$$\text{nMSE}\left(\hat{\mu}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\mu}_{k}^{m}\right)$$
+
+## Unified nMSE for the variance
+- Similarly to the mean, for the sample variance estimator, $\hat{\sigma^2}_{i}^{m}$, we form the variance component of the unified metric by averaging over covariates: 
+
+$$\text{nMSE}\left(\hat{\sigma^{2}}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\sigma^{2}}_{k}^{m}\right)$$
+
+## Unified nMSE for the autocorrelation function
+- For the autocorrelation function we are evaluating its closeness to the one computed on the whole sample using up to 12 lags. 
+
+- Let $\hat\gamma_{i,l}^{m}$ the $l$-th entry of the sample autocorrelation function, where $l=1,\ldots,12$. (Note $\hat\gamma_{i,0}^{m}=1$ always.)  
+
+- We combine the MSE for each of the entries of the autocorrelation function using a decaying exponential weighted average as follows: 
+
+$$\text{nMSE}\left(\hat{\gamma}_{i}^{m}\right)=\frac{1}{\bar{\alpha}}\sum_{l=1}^{12}\alpha^{i-1}\text{nMSE}\left(\hat{\gamma}_{i,l}^{m}\right)$$
+
+- The idea is that the first lags are more important in the ACF.
+
+---
+
+- Then, the autocorrelation component of the unified metric is computed by averaging over covariates:
+
+$$\text{nMSE}\left(\hat{\gamma}^{m}\right)=\frac{1}{K}\sum_{k=1}^{K}\text{nMSE}\left(\hat{\gamma}_{k}^{m}\right)$$
+
+---
+
+## Unified nMSE for the autocorrelation function
+- For the correlation between covariates, we follow a similar approach as for the autocorrelation. 
+- We average over the normalized MSEs of the sample correlation statistics below the main diagonal of the correlation matrix.
+
+- Let $\hat\rho_{i,j}^{m}$ be the sample correlation between covariates $i$ and $j$ under block bootstrap method $m$. We compute the correlation component as follows:
+
+$$\text{nMSE}\left(\hat{\rho}^{m}\right)=\frac{2}{K\left(K-1\right)}\sum_{i=1, j<i}^{K}\text{nMSE}\left(\hat{\rho}_{i,j}^{m}\right)$$
+
+## Unified nMSE for all the statistics
+- In sum, the unified metric for bootstrap method $m$, $\text{unMSE}\left(m\right)$, is defined as the sum of four components: 
+
+$$\begin{aligned}
+\text{unMSE}\left(m\right) &=\text{nMSE}\left(\hat{\mu}^{m}\right)+\text{nMSE}\left(\hat{\sigma^{2}}^{m}\right) + \\ 
+~ & \text{nMSE}\left(\hat{\gamma}^{m}\right)+\text{nMSE}\left(\hat{\rho}^{m}\right)\\
+\end{aligned}$$
+
+## Results of the Unified nMSE
+- In the @fig-unified1, we plot the four components of the unified metric as a function of the block length:
+- We can see that the autocorrelation dominates the normalized error decomposition because the bias is too high for small block lengths.
+
+## Results of the Unified nMSE
+
+![The four components of the unified MSE for the two block bootstrap methods](figures/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png){#fig-unified1}
+
+## Results of the Unified nMSE
+- We show the behavior of the other three components in @fig-unified2.
+- Then, we compute the sum of the four components to get the unified metric.
+
+## Results of the Unified nMSE
+![Three components of the unified MSE for the two block bootstrap methods](figures/unified_metrics_components_nacf_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png){#fig-unified2}
+
+## Results of the Unified nMSE
+- As we can see in @fig-unified-final, the total error decays quickly with the block length for both block methods. 
+- The MBB exhibits a minimum at $l=19$. 
+- Although the SBB does not exhibit a minimum value, we find that 95% of the total decrease in the error occurs at a block length $l=10$.
+
+## Results of the Unified nMSE
+
+![](figures/unified_metrics_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png){#fig-unified-final}
+
+## Important 
+
+- This result is, of course, **contingent on the maximum block length explored for the resampling**, which is $40$ for the figure above.
+- However, we run the experiment with a maximum block length of $90$ (almost the number of observations in the dataset) and find: 
+  - The 95% decrease in the total error occurs at the block length $l=11$.
+
+# Optimal block size from the literature
+## Optimal block size from the literature
+- We compare our insights about the block length with the methodology of  Patton, Politis y White (hereafter, PPW). 
+- They derive a procedure for obtaining the optimal block length for a time series using spectral methods.
+- The optimal block size estimator in the paper uses a criterion based on minimizing the asymptotic mean squared error of the stationary bootstrap variance estimator.
+
+---
+
+- Based on a theorem of Lahiri Politis and White (2004), the MSE criterion in PPW is as follows: 
+
+$$\text{MSE}\left(\hat{\sigma}_{b,SB}^{2}\right)=\frac{G^{2}}{b^{2}}+D_{SB}\frac{b}{N}+o\left(b^{-2}\right)+o\left(b/N\right)$$ 
+
+- The main difference between our method and the PPW method is that our method is applied jointly to all macroeconomic series and the PPW method is applied individually to each series.
+  - They use the MSE of the variance only. 
+  - We look at the mean, and the multivariate statistics (correlation and autocorrelation.)
+
+---
+
+## Results of Patton, Politis and White's method
+- The @fig-ppw shows the results of applying PPW to each of the time series in our dataset.
+
+- We can see that most series require a block length of **less than 10**.
+
+- Time series like core inflation (D4L_CPIXFE) and the year-on-year change of the exchange rate (D4L_S) require a higher block length, as they are more persistent.
+
+- Both the *median and the mean* are **around 10**, which is the optimal block size per SBB according to the methodology we proposed in @ppw2009.
+
+## Results of Patton, Politis and White method
+
+![Optimal block length for the stationary block bootstrap from the literature](figures/ppw2009_optimal_block_length_data=d4l.png){#fig-ppw}
+
+
+# Remarks
+## Concluding Remarks
+
+- We explored a methodology to compare the performance of the moving and stationary block bootstrap methods in replicating the statistical properties of a dataset.
+
+- We used a unified metric to compare the performance of the two methods in replicating the sample mean, variance, autocorrelation function, and correlation matrix between covariates.
+
+- The **stationary block bootstrap method outperforms the moving block bootstrap** method in all statistics of interest.
+
+## Concluding Remarks
+
+- We also compared our results with the optimal block length methodology proposed by Patton, Politis, and White (2009) and found that the optimal block length is consistent with the results obtained from our simulation study.
+
+- Moreover, the methodology presented here can be used to determine the optimal block length for the block bootstrap method in a dataset of interest.
+
+- This methodology can be applied to other resampling methods, such as frequency domain bootstrap methods. 
+
+# References
+## References
+::: {#refs}
+:::
+
+# Appendix
+
+## Normalized MSE Interpretation
+
+- In the bootstrap world, let $\theta$ be an observed statistic and $\hat{\theta}$ be an estimator of such quantity.
+- We can compute the standard deviation of the bootstrap sample distribution of $\hat{\theta}$, $\text{sd}\left(\hat\theta\right)$, to normalize the mean squared error. 
+
+$$\begin{aligned}
+\text{nMSE}\left(\hat{\theta}\right) & =\frac{1}{B}\sum_{b=1}^{B}\left[\frac{\hat{\theta}^{(b)}-\theta}{\text{sd}\left(\hat{\theta}\right)}\right]^{2}\\\end{aligned}$$
+
+## Normalized MSE Interpretation
+
+- Expanding the normalized MSE formula, we obtain: 
+
+$$\begin{aligned}
+\text{nMSE}\left(\hat{\theta}\right) & =\frac{1}{\text{Var}\left(\hat{\theta}\right)}\cdot\frac{1}{B}\sum_{b=1}^{B}\left(\hat{\theta}^{(b)}-\theta\right)^{2}\\
+ & =\frac{1}{\text{Var}\left(\hat{\theta}\right)}\cdot\text{MSE}\left(\hat{\theta}\right)\\
+ & =\frac{1}{\text{Var}\left(\hat{\theta}\right)}\cdot\left[\text{Var}\left(\hat{\theta}\right)+\text{Bias}\left(\hat{\theta}\right)^{2}\right]\\
+\end{aligned}$$
+
+## Normalized MSE Interpretation
+
+$$\text{nMSE}\left(\hat{\theta}\right) = 1+\frac{\text{Bias}\left(\hat{\theta}\right)^{2}}{\text{Var}\left(\hat{\theta}\right)}$$
+
+- Thus, this measure is exactly one (unitless) for unbiased estimators. 
+- In contrast, if the bias of the estimator is small, the $\text{nMSE}$ will be close to one. 
+
+
