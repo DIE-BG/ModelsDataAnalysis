@@ -146,3 +146,15 @@ end
 ## Save preprocessed data
 
 save(datadir("data_QPM.jld2"), "d4l_data", d4l_data, "dla_data", dla_data)
+
+
+## Helper function
+function load_dla_data(with_remittances::Bool)
+    data = load(datadir("data_QPM.jld2"), "dla_data")
+    disallowmissing!(data)
+    if with_remittances
+        return data
+    else
+        return select(data, Not(:REM_GDP))
+    end
+end
