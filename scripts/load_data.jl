@@ -13,6 +13,9 @@ dlafn(x) = vcat(missings(1), 4 * (x[(begin + 1):end] .- x[begin:(end - 1)]))
 
 monthly_data = CSV.read(datadir("monthly.csv"), DataFrame, ignoreemptyrows = true, comment = ".")
 
+const SAMPLE_START = Date(2002, 1)
+const SAMPLE_END = Date(2025, 12)
+
 # Get quarterly data from monthly data
 quarterly_from_monthly_data = @chain monthly_data begin
     @rtransform(
@@ -28,7 +31,7 @@ quarterly_from_monthly_data = @chain monthly_data begin
     @combine(
         :CPI = mean(:CPI),
         :CPIXFE = mean(:CPIXFE),
-        :IPEI = mean(:IPEI),
+        :IPEI = mean(skipmissing(:IPEI)),
         :S = mean(:S),
         :MB = mean(:MB),
         :CPI_RW = mean(:CPI_RW),
@@ -66,7 +69,6 @@ end
 ## D4L data (approximated year-on-year changes by difflog(., 4))
 
 d4l_quarterly_from_monthly_data = @chain quarterly_from_monthly_data begin
-    leftjoin(_, quarterly_data, on = :Date)
     @transform(
         :L_CPI = 100log.(:CPI),
         :L_CPIXFE = 100log.(:CPIXFE),
@@ -83,9 +85,9 @@ d4l_quarterly_from_monthly_data = @chain quarterly_from_monthly_data begin
         :D4L_MB = d4lfn(:L_MB),
         :D4L_CPI_RW = d4lfn(:L_CPI_RW),
     )
-    @rtransform(:REM_GDP = (:REM * :S) / :NGDP)
-    @select(:Date, Cols(r"D4L_"), :REM_GDP, :RS, :RS_RW)
-    @rsubset(:Date >= Date(2002, 1) && :Date <= Date(2025, 9))
+    leftjoin(_, rem_gdp_data, on = :Date)
+    @select(:Date, Cols(r"D4L_"), Cols(r"RS"), :REM_GDP)
+    @rsubset(:Date >= SAMPLE_START && :Date <= SAMPLE_END)
     disallowmissing
 end
 
@@ -102,7 +104,7 @@ d4l_quarterly_data = @chain quarterly_data begin
         :D4L_GDP_RW = d4lfn(:L_GDP_RW),
     )
     @select(:Date, Cols(r"D4L_"))
-    @rsubset(:Date >= Date(2002, 1) && :Date <= Date(2025, 9))
+    @rsubset(:Date >= SAMPLE_START && :Date <= SAMPLE_END) # Restrict to the same sample as D4L data
     @select(Not(:D4L_NGDP))
     disallowmissing
 end
@@ -134,8 +136,10 @@ dla_data = @chain quarterly_from_monthly_data begin
         :DLA_GDP = dlafn(:L_GDP),
         :DLA_GDP_RW = dlafn(:L_GDP_RW),
     )
-    @rtransform(:REM_GDP = (:REM * :S) / :NGDP)
-    @select(:Date, Cols(r"DLA_"), :REM_GDP, :RS, :RS_RW)
+    @rtransform(:REM_GDP = (:REM * :S) / :NGDP) # Add remmitances/GDP ratio
+    @select(:Date, Cols(r"DLA_"), Cols(r"RS"), :REM_GDP)
+    @rsubset(:Date >= SAMPLE_START && :Date <= SAMPLE_END) # Restrict to the same sample as D4L data
+    disallowmissing
 end
 
 
