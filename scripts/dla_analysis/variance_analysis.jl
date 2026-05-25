@@ -7,7 +7,7 @@ using CairoMakie
 using DataFramesMeta
 
 ## Load data
-WITH_REMITTANCES = true  # Configuration: choose whether to include remittances in the analysis
+WITH_REMITTANCES = false  # Configuration: choose whether to include remittances in the analysis
 DLA_DATA = load_dla_data(WITH_REMITTANCES)
 # Set output directory based on dataset choice
 PLOTSDIR = mkpath(plotsdir("dla_analysis", "variance", WITH_REMITTANCES ? "with_rem_gdp" : "without_rem_gdp"))
@@ -168,8 +168,8 @@ l2norm_mse_stationary_all = mean(l2norm_mse_stationary, dims = 2)
 ## Plots
 varnames = [
     "total inflation", "core inflation", "import prices", "exchange rate",
-    "Monetary base", "external inflation", "policy rate", "external policy rate", "remittances over GDP", "Domestic product",
-    "external product",
+    "Monetary base", "external inflation", "Domestic product", "external product",
+    "policy rate", "external policy rate",
 ]
 
 Bvar_cod = propertynames(DLA_DATA)[(begin + 1):end]
