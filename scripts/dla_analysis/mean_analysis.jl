@@ -10,7 +10,7 @@ using DataFramesMeta
 
 # Load data
 ## Load data
-WITH_REMITTANCES = false  # Configuration: choose whether to include remittances in the analysis
+WITH_REMITTANCES = true  # Configuration: choose whether to include remittances in the analysis
 DLA_DATA = load_dla_data(WITH_REMITTANCES)
 # Set output directory based on dataset choice
 PLOTSDIR = mkpath(plotsdir("dla_analysis", "mean", WITH_REMITTANCES ? "with_rem_gdp" : "without_rem_gdp"))
