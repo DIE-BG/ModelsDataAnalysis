@@ -6,7 +6,7 @@ using Documenter
 # Here you may include files from the source directory
 # include(srcdir("dummy_src_file.jl"))
 
-# Copy plots folder 
+# Copy plots folder
 # SRC_PLOTS_PATH = mkpath(projectdir("docs", "src", "images", "periodograms"))
 # cp(plotsdir("periodograms"), SRC_PLOTS_PATH; force=true)
 
@@ -19,14 +19,17 @@ makedocs(;
         "index.md",
         "Frequency Analysis" => "periodogram.md",
         "Block Bootstrap" => [
-            "Simulation Study" => "block_bootstrap_exercise.md"
+            "Simulation Study" => [
+                "block_bootstrap_exercise.md",
+                "dla_analysis.md",
+            ],
             "Detailed Results" => [
                 "mean.md",
                 "std.md",
                 "acf.md",
-                "covariance.md"
-            ]
-        ]
+                "covariance.md",
+            ],
+        ],
     ],
     # Don't worry about what `CI` does in this line.
     format = Documenter.HTML(prettyurls = CI),
