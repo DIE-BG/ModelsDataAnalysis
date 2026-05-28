@@ -1,9 +1,8 @@
 # Block Bootstrap Simulation Exercise with DLAs
-
-In the same line of Simulation Study section, we present some of main results 
-of Block Bootstrap Simulation Exercise 
-using 11 variables. In this case, most of the time series are annualized
-quarterly-on-quarterly rates of change, in quarterly frequency.
+In line with the previously section, we present some of the main results 
+from the Block Bootstrap Simulation Exercise using 11 variables. In this case, 
+most of the time series are annualized quarter-on-quarter rates of change 
+at a quarterly frequency.
 
 ## Variables quarterly-on-quarterly change
 
@@ -19,7 +18,7 @@ The time series considered are the following variables:
 8. Monetary base (DLA\_MB)
 9. Monetary policy rate (RS)
 10. Import prices (DLA\_IPEI)
-11. Remmitances (GTQ) over nominal GDP (REM\_GDP)
+11. Remmitances (GTQ) percent of GDP (REM\_GDP)
 
 In order to generate robust results in this exercise, we generated $B=10000$ bootstrap 
 replications of the dataset. The time series are resampled using a range of possible block lengths. 
@@ -70,7 +69,7 @@ aggregate across various statistics of interest.
 ## Results for the sample variance
 
 For the sample variance of each of the covariates, we follow a
- similar procedure for comparing between block bootstrap methods as the one used for the sample mean. 
+similar procedure for comparing between block bootstrap methods as the one used for the sample mean. 
 
 ![](images/dla_analysis/variance/all_MSE.png)
 ![](images/dla_analysis/variance/all_normalized_MSE.png)
@@ -79,11 +78,12 @@ Let us note how the MSE behavior of the sample variance estimator with the MMB m
 more volatile than that with the SBB method. This is true for the unnormalized MSE as 
 well as for the normalized MSE. In both cases we prefer the SBB method as the most 
 apropiate method to replicate the sample variance for most block lengths. However, 
-the analysis is still incomplete, as we need to takie into account the sample 
+the analysis is still incomplete, as we need to take into account the sample 
 autocorrelation of each of the covariates and the correlation matrix to 
 determine the best method to replicate the statistics of interest.
 
 ## Results of the sample autocorrelation function
+
 For the autocorrelation fuction analysis we have an additional 
 dimension (i.e. the lags of the autocorrelation function entries) 
 to determine the error with respect to the sample autocorrelation function. 
@@ -101,8 +101,8 @@ is that we have an additional dimension.
 To measure the overall MSE, we compute a weighted average 
 over all lags. All weights decay exponentially.
 
-![](images/dla_analysis/autocorr/agg_acf_mse_method=stationary_moving.png)
-![](images/dla_analysis/autocorr/agg_acf_norm_mse_method=stationary_moving.png)
+![](images/dla_analysis/autocorrelation/agg_acf_mse_method=stationary_moving.png)
+![](images/dla_analysis/autocorrelation/agg_acf_norm_mse_method=stationary_moving.png)
 
 For both the MBB and the SBB (and for their normalized version of the MSE), 
 the error decays significantly in the first 10 possible block lengths. 
@@ -122,8 +122,10 @@ The normalized MSE shows the same behavior for the MBB and the SBB methods, with
 slightly more volatility for the SBB method. Like in others statistics, the SBB 
 method exhibits the best results with consistently smaller MSE than the MBB method.
 
-![](images/dla_analysis/cov/cor_mse_method=stationary_moving.png)
-![](images/dla_analysis/cov/norm_cor_mse_method=stationary_moving.png)
+![](images/dla_analysis/covariance/cor_mse_method=stationary_moving.png)
+![](images/dla_analysis/covariance/norm_cor_mse_method=stationary_moving.png)
+
+
 
 Consistent with others statistics, the SBB method is the best to replicate 
 the sample covariance matrix characteristics for the different block lengths.
@@ -141,16 +143,28 @@ metric as a function of the block length:
 
 ![center](images/dla_analysis/unified/unified_metrics_components_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
 
-We can see that the autocorrelation dominates the normalized error decomposition because the bias is too high for small block lengths. 
+We can see that the autocorrelation dominates the normalized error decomposition 
+because the bias is too high for small block lengths. 
 In the following figure, we show the behavior of the other three components: 
 
 ![center](images/dla_analysis/unified/unified_metrics_components_nacf_B=10000_L_autocor=12_L_block=40_method=stationary_moving.png)
 
-Then, we compute the sum of the four components to get the unified metric. This is shown in the figure below. 
-As we can see, the total error decays quickly with the block length for both block methods.
-This rapid decrease suggests that the block length for resampling the whole dataset (with 91 observations) is not necessarily too big to approximate well the four components we care about with the unified metric.  
+Then, we compute the sum of the four components to get the unified metric. 
+This is shown in the figure below. 
+As we can see, the total error decays quickly with the block 
+length for both block methods.
+This rapid decrease suggests that the block length for resampling the whole dataset 
+(with 91 observations) is not necessarily too big to approximate well the four 
+components we care about with the unified metric.  
 The MBB exhibits a minimum at $l=19$. 
-Althought the SBB does not exhibit a minimum value, we find that 95% of the total decrease in the error occurs at a block length $l=12$. This result is, of course, contingent on the maximum block length explored for the resampling, which is $40$ for the figure below. However, we re-run the experiment with a maximum block length of $90$ (almost the number of observations in the dataset) and find that the 95% decrease in the total error occurs at the block length $l=12$. 
+Althought the SBB does not exhibit a minimum value, we find that 
+95% of the total decrease in the error 
+occurs at a block length $l=12$. This result is, of course, 
+contingent on the maximum 
+block length explored for the resampling, which is $40$ for the figure below. However, 
+we re-run the experiment with a maximum block length of $90$ (almost the number of 
+observations in the dataset) and find that the 95% decrease in the total 
+error occurs at the block length $l=12$. 
 
 ![center](images/dla_analysis/unified/unified_metrics_B=10000_L_autocor=12_L_block=40_beta=0.95_method=stationary_moving.png)
 
@@ -159,10 +173,20 @@ Althought the SBB does not exhibit a minimum value, we find that 95% of the tota
 
 ## Concluding remarks
 
-In this simulation study we presented a methodology to compare the performance of the moving and stationary block bootstrap methods in replicating the statistical properties of a dataset.
-We used a unified metric to compare the performance of the two methods in replicating the sample mean, variance, autocorrelation function, and correlation matrix between covariates.
-We found that the stationary block bootstrap method outperforms the moving block bootstrap method in all statistics of interest.
-We also compared our results with the optimal block length methodology proposed by Patton, Politis, and White (2009) and found that the optimal block length is consistent with the results obtained from our simulation study.
-Moreover, the methodology presented here can be used to determine the optimal block length for the block bootstrap method in a dataset of interest.
-We leave for future work the extension of this methodology to other resampling methods, such as frequency domain bootstrap methods. 
+In this simulation study we presented a methodology to compare the performance of the moving and 
+stationary block bootstrap methods in replicating the statistical properties of a dataset.
+We used a unified metric to compare the performance of the two methods in replicating the 
+sample mean, variance, autocorrelation function, and correlation matrix between covariates.
+We found that the stationary block bootstrap method outperforms the moving block bootstrap 
+method in all statistics of interest.
 
+
+
+Unlike the exercise based on year-over-year changes, the optimal block size for the stationary 
+bootstrap differs when using annualized quarter-on-quarter changes. The aggregate weighted 
+average of the MSEs of the autocorrelations over 12 lags decreases more sharply for the 
+variables expressed in year-over-year changes as block sizes increase. The year-over-year 
+series appears smoother, more persistent, and more strongly dominated by low frequencies, 
+which allows it to capture autocorrelation more effectively when the block size increases.
+
+ 

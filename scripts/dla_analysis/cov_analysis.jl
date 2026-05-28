@@ -16,7 +16,7 @@ ft2(x) = Printf.@sprintf("%.2f", x)
 
 
 ## Load data
-WITH_REMITTANCES = false  # Configuration: choose whether to include remittances in the analysis
+WITH_REMITTANCES = true  # Configuration: choose whether to include remittances in the analysis
 DLA_DATA = load_dla_data(WITH_REMITTANCES)
 # Set output directory based on dataset choice
 PLOTSDIR = mkpath(plotsdir("dla_analysis", "covariance", WITH_REMITTANCES ? "with_rem_gdp" : "without_rem_gdp"))
@@ -123,7 +123,7 @@ end
 sqr(x) = x^2
 
 # Eval mask to obtain lower triangular elements of the correlation matrices
-eval_mask = tril(repeat([true], 10, 10), -1)
+eval_mask = tril(repeat([true], 11, 11), -1)
 
 # Plot the overall MSE of the correlation matrix vs block length
 # MSE
